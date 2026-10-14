@@ -12,6 +12,8 @@
 </head>
 <body>
 <canvas id="c" width="1280" height="720"></canvas>
+<script src="assets/narration-data.js"></script>
+<script src="assets/narration-player.js"></script>
 <script>
 (() => {
 'use strict';
@@ -21,7 +23,7 @@
    前は physical-ai3.html（第3章）。動画全体ではこのあと OP（physical-ai1.html）へ戻る。
    1280×720 の座標系で全てをコード描画し、ウィンドウに合わせて拡大する。
    操作不要で自動再生・ループ。時刻は動画全体（3分05秒）の時刻で扱う。
-   確認用: Space=一時停止 / ←→=1秒移動 / ↑↓=テンポ調整 / Home=頭へ
+   確認用: Space=一時停止 / ←→=1秒移動 / ↑↓=テンポ調整 / Home=頭へ（音声は音声ONで有効）
            #t=秒 で静止表示（140〜185）
    テンポ: 下のほうにある SLOW（表示時間の倍率）で変える。URL に #slow=1.5 と付けても変わる。
    index.html が physical-ai1〜4 を順に連続再生する。
@@ -813,78 +815,22 @@ function fit() {
   render(now());
 }
 
-/* ---------- 再生の制御 ---------- */
-const Q = location.search + location.hash;
-// テンポ：各シーンの表示時間の倍率。1 = シナリオどおりの長さ、2 = 2倍ゆっくり（読む時間が延びる）。
-// ここの数字を書き換えるか、URL の末尾に #slow=1.5 のように付ける。再生中は ↑（ゆっくり）↓（速く）で 0.05 ずつ変わる。
-let SLOW = 2;
-{ const m = /[?#&]slow=([\d.]+)/.exec(Q); if (m && +m[1] > 0) SLOW = clamp(+m[1], .5, 3); }
-// index.html から連続再生されるときの指定。once = ループせず、終わったら親に知らせる / hold = 合図が来るまで頭で待つ
-const EMBED = window.parent !== window, ONCE = /[?#&]once\b/.test(Q);
-const BGP = ONCE ? 185 : LOOP;          // 背景のゆらぎの周期（連続再生では動画全体で1周）
-let paused = /[?#&]hold\b/.test(Q), held = T0, base = performance.now(), ended = false, toastAt = -1e9;
-const tell = msg => { if (EMBED) window.parent.postMessage(Object.assign({ pai: 1 }, msg), '*'); };
-function readT() {
-  const m = /[?#&]t=([\d.]+)/.exec(location.search + location.hash);
-  if (m) { paused = true; held = clamp(parseFloat(m[1]) || T0, T0, T1 - .001); }
-}
-readT();
-addEventListener('hashchange', readT);
-window.seekTo = t => { paused = true; held = clamp(+t || T0, T0, T1 - .001); fit(); };   // 確認用：指定秒で静止
-// 画面に出す時刻（動画全体の時刻・秒）。実時間を SLOW で割って進める
-function now() {
-  if (paused) return held;
-  const el = (performance.now() - base) / 1000 / SLOW;
-  if (!ONCE) return T0 + el % LOOP;
-  if (el < LOOP) return T0 + el;
-  if (!ended) { ended = true; tell({ ev: 'ended' }); }
-  return T1 - .001;
-}
-function seek(t) {
-  t = ONCE ? clamp(t, T0, T1 - .001) : T0 + (((t - T0) % LOOP) + LOOP) % LOOP;
-  held = t; base = performance.now() - (t - T0) * 1000 * SLOW; ended = false;
-}
-function play() { if (paused) { seek(held); paused = false; } }
-function pause() { if (!paused) { held = now(); paused = true; } }
-function setSlow(v) { const t = now(); SLOW = clamp(Math.round(v * 100) / 100, .5, 3); seek(t); toastAt = performance.now(); }
-function toast() {
-  if (EMBED || performance.now() - toastAt > 1800) return;
-  const str = 'テンポ：表示時間 ×' + SLOW.toFixed(2);
-  ctx.font = font(16, 700);
-  const w = ctx.measureText(str).width + 28;
-  rr(64, 658, w, 28, 14); ctx.fillStyle = 'rgba(6,20,46,.92)'; ctx.fill();
-  ctx.strokeStyle = 'rgba(255,255,255,.4)'; ctx.lineWidth = 1; ctx.stroke();
-  text(str, 78, 678, 16, '#fff', { align: 'left' });
-}
-addEventListener('keydown', e => {
-  if (e.code === 'Space') { if (paused) play(); else pause(); e.preventDefault(); }
-  else if (e.code === 'ArrowRight') seek(now() + 1);
-  else if (e.code === 'ArrowLeft') seek(now() - 1);
-  else if (e.code === 'ArrowUp') { setSlow(SLOW + .05); e.preventDefault(); }
-  else if (e.code === 'ArrowDown') { setSlow(SLOW - .05); e.preventDefault(); }
-  else if (e.code === 'Home') seek(T0);
-  else if (/^(Digit|Numpad)\d$/.test(e.code) && CH_LABEL[+e.code.slice(-1)]) seek(CH_LABEL[+e.code.slice(-1)][0]);
-});
-// index.html（親）からの合図
-addEventListener('message', e => {
-  const d = e.data;
-  if (!EMBED || e.source !== window.parent || !d || d.pai !== 1) return;
-  if (d.cmd === 'restart') { seek(T0); paused = false; }
-  else if (d.cmd === 'toggle') { if (paused) play(); else pause(); }
-  else if (d.cmd === 'slow') setSlow(d.v);
-  else if (d.cmd === 'seek') seek(now() + d.d);
-});
+/* ---------- 再生の制御（CanvasとMP3の共通タイムライン） ---------- */
+const BGP = window.parent !== window ? 185 : LOOP;
+const timeline = window.PhysicalAI.createChapter(T0, T1);
+const now = () => timeline.time;
+// 操作の案内・テンポ表示は共通プレイヤーのUIで表示する。
+function toast() {}
+window.seekTo = t => { timeline.seek(t); fit(); };
 addEventListener('resize', fit);
 let vw = 0, vh = 0;
 function frame() {
-  if (innerWidth !== vw || innerHeight !== vh) { vw = innerWidth; vh = innerHeight; fit(); }   // resize イベントが来ない環境への保険
+  if (innerWidth !== vw || innerHeight !== vh) { vw = innerWidth; vh = innerHeight; fit(); }
   else render(now());
   requestAnimationFrame(frame);
 }
 fit();
 requestAnimationFrame(frame);
-tell({ ev: 'ready' });
-if (ONCE) setInterval(now, 200);   // 画面の描画が止まっている間も、章の終わりを検出して親に知らせる
 })();
 </script>
 </body>

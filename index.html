@@ -18,95 +18,11 @@
 <iframe id="f0" tabindex="-1" title="解説動画"></iframe>
 <iframe id="f1" tabindex="-1" title="解説動画（次の章）"></iframe>
 <div id="toast"></div>
+<script src="assets/narration-data.js"></script>
+<script src="assets/narration-player.js"></script>
 <script>
-(() => {
-'use strict';
-
-/* ------------------------------------------------------------------
-   調合AIロボット 解説動画  連続再生
-   physical-ai1〜4.html を順に再生し、最後まで行ったら OP へ戻る。
-   このファイルと同じフォルダに physical-ai1〜4.html を置いて開く。操作不要で自動再生。
-
-   仕組み: 2つの枠（iframe）を重ね、表の枠で今の章を再生しながら、裏の枠に次の章を
-           頭で止めたまま読み込んでおく。章が終わると合図（postMessage）が届くので、
-           表と裏を入れ替えて次の章を再生する。
-
-   確認用: Space=一時停止 / ←→=1秒移動 / ↑↓=テンポ調整 / 1〜4=その章の頭へ
-   ------------------------------------------------------------------ */
-
-const FILES = ['physical-ai1.html', 'physical-ai2.html', 'physical-ai3.html', 'physical-ai4.html'];
-const DUR = [45, 40, 55, 45];          // 各ファイルの長さ（秒・テンポ1のとき）。合図が届かない環境での保険に使う
-
-// テンポ：各シーンの表示時間の倍率。1 = シナリオどおりの長さ（3分05秒）、2 = 2倍ゆっくり（6分10秒）。
-// ここの数字を書き換えるか、URL の末尾に #slow=1.5 のように付ける。再生中は ↑（ゆっくり）↓（速く）で 0.05 ずつ変わる。
-let SLOW = 2;
-{ const m = /[?#&]slow=([\d.]+)/.exec(location.search + location.hash); if (m && +m[1] > 0) SLOW = Math.min(3, Math.max(.5, +m[1])); }
-
-const fr = [document.getElementById('f0'), document.getElementById('f1')];
-const toastEl = document.getElementById('toast');
-let vis = 0;                           // 表に出している枠（0 か 1）
-let chap = 0;                          // 再生中の章（FILES の番号）
-let seq = 0, msgOK = false, timer = 0, toastTimer = 0;
-
-// ?r= は毎回変えて、同じファイルでも必ず読み込み直させる
-const url = (i, hold) => `${FILES[i]}?r=${++seq}#once${hold ? '&hold' : ''}&slow=${SLOW}`;
-const post = (f, m) => { try { f.contentWindow.postMessage(Object.assign({ pai: 1 }, m), '*'); } catch (e) { /* 読み込み前は無視 */ } };
-const show = () => { fr[vis].className = 'on'; fr[1 - vis].className = ''; };
-
-// i 番目の章を表の枠で頭から再生し、その次の章を裏の枠に用意する
-function start(i) {
-  clearTimeout(timer);
-  chap = i;
-  fr[vis].onload = () => {
-    // 章からの合図が一度も届かない環境では、長さから計算した時間で次へ進める
-    if (!msgOK) timer = setTimeout(advance, DUR[chap] * SLOW * 1000 + 300);
-  };
-  fr[1 - vis].onload = null;
-  fr[vis].src = url(i, false);
-  fr[1 - vis].src = url((i + 1) % FILES.length, true);
-  show();
-}
-
-// 次の章へ進む
-function advance() {
-  clearTimeout(timer);
-  const next = (chap + 1) % FILES.length;
-  if (!msgOK) { start(next); return; }
-  vis = 1 - vis; chap = next;
-  post(fr[vis], { cmd: 'restart' });   // 裏で待っていた章を頭から再生
-  show();
-  fr[1 - vis].onload = null;
-  fr[1 - vis].src = url((chap + 1) % FILES.length, true);
-}
-
-addEventListener('message', e => {
-  const d = e.data;
-  if (!d || d.pai !== 1) return;
-  msgOK = true; clearTimeout(timer);
-  if (d.ev === 'ended' && e.source === fr[vis].contentWindow) advance();
-});
-
-function toast(str) {
-  toastEl.textContent = str; toastEl.className = 'on';
-  clearTimeout(toastTimer); toastTimer = setTimeout(() => { toastEl.className = ''; }, 1800);
-}
-function setSlow(v) {
-  SLOW = Math.min(3, Math.max(.5, Math.round(v * 100) / 100));
-  fr.forEach(f => post(f, { cmd: 'slow', v: SLOW }));
-  toast('テンポ：表示時間 ×' + SLOW.toFixed(2));
-}
-
-addEventListener('keydown', e => {
-  if (e.code === 'Space') { post(fr[vis], { cmd: 'toggle' }); e.preventDefault(); }
-  else if (e.code === 'ArrowRight') post(fr[vis], { cmd: 'seek', d: 1 });
-  else if (e.code === 'ArrowLeft') post(fr[vis], { cmd: 'seek', d: -1 });
-  else if (e.code === 'ArrowUp') { setSlow(SLOW + .05); e.preventDefault(); }
-  else if (e.code === 'ArrowDown') { setSlow(SLOW - .05); e.preventDefault(); }
-  else if (/^(Digit|Numpad)[1-4]$/.test(e.code)) start(+e.code.slice(-1) - 1);
-});
-
-start(0);
-})();
+// Canvasの章とローカルMP3は、親プレイヤーの同じ時計を使用する。
+window.PhysicalAI.startPlaylist([document.getElementById('f0'), document.getElementById('f1')]);
 </script>
 </body>
 </html>
