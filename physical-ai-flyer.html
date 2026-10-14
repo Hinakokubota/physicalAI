@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>調合AIロボット フライヤー</title>
+<!--
+  調合AIロボット デモ紹介フライヤー（1枚・印刷用・動きなし）
+  ・画面では 1280×720 の横長1枚として、ウィンドウいっぱいに表示する。
+  ・印刷（Ctrl+P）では A4 横 1枚に収まるよう、同じ内容を A4 の縦横比（1280×905）に組み直す。
+    印刷ダイアログは「用紙 A4・横」「余白 なし」にする。
+  ・A4 の組みを画面で確かめたいときは、URL の末尾に ?paper=a4 を付ける。
+  ・画像や外部ファイルは使わず、図はすべてこのファイル内の SVG で描いている。
+-->
+<style>
+  :root {
+    --blue: #0C5FB0; --navy: #0b2447; --ink: #1c2f52; --line: #cfdcee; --soft: #f1f6fc;
+    --sky: #3aa8ff; --purple: #a259ff; --red: #ff3f7a; --inkblue: #2d7dff; --yellow: #ffc93c; --green: #12a26f;
+    --steel: #51688f;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: #46546b; overflow: hidden; }
+  body {
+    font-family: "BIZ UDPGothic", "BIZ UDGothic", "Yu Gothic UI", "Yu Gothic", "Meiryo", "Hiragino Sans", "Noto Sans JP", sans-serif;
+    color: var(--ink); -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  .sheet {
+    position: absolute; left: 0; top: 0; width: 1280px; height: 720px; background: #fff;
+    display: flex; flex-direction: column; transform-origin: 0 0; overflow: hidden;
+  }
+  html.a4 .sheet { height: 905px; }
+  svg text { font-family: inherit; font-weight: 700; fill: var(--navy); }
+
+  /* ---- 見出し帯 ---- */
+  header {
+    flex: 0 0 112px; display: flex; align-items: center; justify-content: space-between; gap: 24px;
+    padding: 0 28px 0 32px; color: #fff; background: linear-gradient(100deg, #0a3f86, #0C5FB0 55%, #2f8fe0);
+  }
+  html.a4 header { flex-basis: 136px; }
+  .eyebrow { font-size: 13px; font-weight: 700; letter-spacing: .14em; opacity: .92; margin-bottom: 5px; }
+  h1 { font-size: 38px; font-weight: 900; letter-spacing: .02em; line-height: 1.12; }
+  .lead { font-size: 14px; margin-top: 7px; }
+  .pa { flex: 0 0 384px; padding: 9px 14px 10px; border-radius: 12px; background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.5); }
+  .pa b { display: block; font-size: 15px; font-weight: 900; }
+  .pa .flow3 { display: flex; align-items: center; gap: 8px; margin: 6px 0 5px; font-size: 14px; font-weight: 900; }
+  .pa .flow3 span { padding: 3px 14px; border-radius: 999px; background: #fff; color: var(--blue); }
+  .pa p { font-size: 11.5px; line-height: 1.45; opacity: .95; }
+
+  /* ---- 本文 ---- */
+  main { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 12px; padding: 12px 28px; }
+  h2 { display: flex; align-items: baseline; gap: 10px; font-size: 13px; font-weight: 500; color: var(--steel); margin-bottom: 6px; }
+  h2 b { font-size: 17px; font-weight: 900; color: var(--blue); }
+  .steps { flex: 1.08; min-height: 0; display: flex; flex-direction: column; }
+  .cards4 { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .step {
+    position: relative; min-height: 0; display: flex; flex-direction: column; padding: 9px 12px 10px;
+    background: #fff; border: 1.5px solid var(--line); border-radius: 12px;
+  }
+  .step:not(:last-child)::after {
+    content: ''; position: absolute; right: -15px; top: 50%; margin-top: -8px;
+    border: 8px solid transparent; border-left-color: var(--blue);
+  }
+  .step h3 { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 900; color: var(--navy); white-space: nowrap; }
+  .num { flex: 0 0 24px; height: 24px; display: grid; place-items: center; border-radius: 50%; background: var(--blue); color: #fff; font-size: 14px; font-weight: 900; }
+  .step svg { flex: 1; min-height: 0; width: 100%; margin: 6px 0 5px; }
+  .step p { font-size: 12.5px; line-height: 1.5; }
+
+  .row2 { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr) minmax(0, 1.08fr); gap: 16px; }
+  .box { min-height: 0; display: flex; flex-direction: column; padding: 10px 14px 11px; background: var(--soft); border-radius: 12px; }
+  .box > h3 { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 900; color: var(--navy); white-space: nowrap; }
+  .tag { padding: 2px 10px; border-radius: 999px; background: var(--blue); color: #fff; font-size: 12px; font-weight: 700; }
+  .tag.warn { background: var(--yellow); color: var(--navy); }
+
+  /* しくみ */
+  .flow { flex: 1; min-height: 0; display: flex; align-items: center; gap: 4px; margin: 6px 0; }
+  .node { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; align-self: stretch;
+          padding: 6px 4px; background: #fff; border: 1.5px solid var(--line); border-radius: 10px; }
+  .node svg { flex: 0 0 auto; margin-bottom: 3px; }
+  .node b { font-size: 12.5px; font-weight: 900; color: var(--navy); white-space: nowrap; }
+  .node small { font-size: 10px; line-height: 1.3; color: var(--steel); }
+  .n-person { flex: 0 0 62px; } .n-ai { flex: 0 0 104px; } .n-skill { flex: 1; min-width: 0; } .n-robot { flex: 0 0 96px; }
+  .arr { flex: 0 0 0; border: 6px solid transparent; border-left-color: var(--blue); margin: 0 1px 0 3px; }
+  .chips { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; width: 100%; padding: 0 4px; margin-bottom: 5px; }
+  .chips span { display: flex; align-items: center; gap: 4px; padding: 3px 5px; border-radius: 6px; background: #e3f1ff; border: 1px solid #a9d0f5;
+                font-size: 10.5px; font-weight: 700; color: var(--navy); white-space: nowrap; }
+  .ck { flex: 0 0 11px; width: 11px; height: 11px; }
+  .roles { display: flex; gap: 8px; margin-bottom: 6px; }
+  .roles span { flex: 1; padding: 4px 0; border-radius: 999px; text-align: center; font-size: 12.5px; font-weight: 900; background: #fff; }
+  .roles .r1 { color: #6a35c9; border: 1.5px solid var(--purple); }
+  .roles .r2 { color: var(--blue); border: 1.5px solid var(--sky); }
+  .note { font-size: 11.5px; line-height: 1.5; }
+
+  /* 特長 */
+  .feats { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: space-evenly; margin: 4px 0; }
+  .feat { display: flex; gap: 9px; align-items: flex-start; }
+  .feat .num { margin-top: 1px; }
+  .feat b { display: block; font-size: 13.5px; font-weight: 900; color: var(--navy); }
+  .feat div span { display: block; font-size: 11.5px; line-height: 1.45; }
+  .box .foot { padding-top: 6px; border-top: 1px dashed #b9cbe3; font-size: 11.5px; line-height: 1.45; color: var(--navy); font-weight: 700; }
+
+  /* 応用 */
+  .apps { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin: 6px 0; }
+  .app { min-width: 0; display: flex; align-items: center; gap: 7px; padding: 5px 7px; background: #fff; border: 1.5px solid var(--line); border-radius: 10px; }
+  .app svg { flex: 0 0 34px; width: 34px; height: 34px; }
+  .app b { display: block; font-size: 13px; font-weight: 900; color: var(--navy); white-space: nowrap; }
+  .app span { display: block; font-size: 11px; color: var(--steel); white-space: nowrap; }
+  .caveat { font-size: 10.5px; line-height: 1.4; color: var(--steel); }
+
+  /* ---- 下の帯 ---- */
+  footer {
+    flex: 0 0 54px; display: flex; align-items: center; justify-content: space-between; gap: 20px;
+    padding: 0 28px 0 32px; background: var(--navy); color: #fff;
+  }
+  html.a4 footer { flex-basis: 64px; }
+  /* A4 では縦に余裕が出るので、本文の文字を少し大きくする */
+  html.a4 .step h3 { font-size: 16px; }
+  html.a4 .step p { font-size: 14px; }
+  html.a4 .note, html.a4 .feat div span, html.a4 .box .foot { font-size: 12.5px; }
+  html.a4 .feat b { font-size: 14.5px; }
+  html.a4 .roles span { font-size: 13.5px; padding: 6px 0; }
+  html.a4 .caveat { font-size: 11.5px; }
+  .cta { display: flex; align-items: center; gap: 16px; font-size: 19px; font-weight: 900; }
+  .cta span { padding: 6px 20px; border-radius: 999px; background: var(--yellow); color: var(--navy); font-size: 17px; }
+  .org { font-size: 14px; font-weight: 700; letter-spacing: .04em; }
+
+  /* ---- 印刷：A4 横 1枚 ---- */
+  @page { size: A4 landscape; margin: 0; }
+  @media print {
+    html, body { width: 297mm; height: 209.5mm; background: #fff; overflow: hidden; }
+    .sheet { height: 905px; transform: scale(.8769) !important; }   /* 297mm ÷ 1280px */
+    header { flex-basis: 136px; }
+    footer { flex-basis: 64px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 図で使い回す部品 -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="gAI" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3aa8ff"/><stop offset="1" stop-color="#a259ff"/></linearGradient>
+    <symbol id="s-person" viewBox="0 0 40 60"><circle cx="20" cy="11" r="10"/><path d="M3 60V38q0-13 17-13t17 13v22z"/></symbol>
+    <symbol id="s-ai" viewBox="0 0 60 60">
+      <circle cx="30" cy="30" r="27" fill="url(#gAI)" stroke="#fff" stroke-width="2"/>
+      <text x="30" y="39" text-anchor="middle" font-size="25" style="fill:#fff;font-weight:900">AI</text>
+    </symbol>
+    <symbol id="s-cup" viewBox="0 0 40 34">
+      <path d="M3 15H37V26q0 5-5 5H8q-5 0-5-5z" fill="currentColor"/>
+      <path d="M2 2V26q0 6 6 6H32q6 0 6-6V2" fill="none" stroke="#51688f" stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="s-bottle" viewBox="0 0 16 24">
+      <rect x="2" y="9" width="12" height="13" rx="1.5" fill="currentColor"/>
+      <rect x="1" y="1" width="14" height="22" rx="2.5" fill="none" stroke="#51688f" stroke-width="1.6"/>
+    </symbol>
+    <!-- ロボットアームと電動ピペット。ピペット先端は (30,84) -->
+    <symbol id="s-arm" viewBox="0 0 120 110">
+      <rect x="70" y="100" width="40" height="8" rx="2" fill="#6f84a8"/>
+      <rect x="79" y="76" width="22" height="26" rx="5" fill="#f4f7fb" stroke="#6f84a8" stroke-width="1.5"/>
+      <path d="M90 78L72 26" stroke="#6f84a8" stroke-width="15" stroke-linecap="round"/><path d="M90 78L72 26" stroke="#f4f7fb" stroke-width="12" stroke-linecap="round"/>
+      <path d="M72 26L30 40" stroke="#6f84a8" stroke-width="12.5" stroke-linecap="round"/><path d="M72 26L30 40" stroke="#f4f7fb" stroke-width="9.5" stroke-linecap="round"/>
+      <rect x="25" y="42" width="10" height="17" rx="2.5" fill="#26324d"/><rect x="28" y="59" width="4" height="5" fill="#9fb0c9"/>
+      <polygon points="27.4,64 32.6,64 30.8,84 29.2,84" fill="currentColor" stroke="#51688f" stroke-width=".8"/>
+      <circle cx="90" cy="78" r="8.5" fill="#f4f7fb" stroke="#6f84a8" stroke-width="1.5"/><circle cx="90" cy="78" r="3.5" fill="#3aa8ff"/>
+      <circle cx="72" cy="26" r="7.5" fill="#f4f7fb" stroke="#6f84a8" stroke-width="1.5"/><circle cx="72" cy="26" r="3" fill="#3aa8ff"/>
+      <circle cx="30" cy="40" r="6" fill="#f4f7fb" stroke="#6f84a8" stroke-width="1.5"/><circle cx="30" cy="40" r="2.4" fill="#3aa8ff"/>
+    </symbol>
+    <symbol id="s-cam" viewBox="0 0 50 40">
+      <rect x="4" y="2" width="42" height="22" rx="5" fill="#f4f7fb" stroke="#6f84a8" stroke-width="1.5"/>
+      <rect x="18" y="24" width="14" height="5" rx="1.5" fill="#6f84a8"/>
+      <circle cx="25" cy="33" r="5" fill="#0b2447" stroke="#3aa8ff" stroke-width="1.5"/>
+    </symbol>
+    <symbol id="s-mic" viewBox="0 0 30 70">
+      <path d="M4 20a11 11 0 0 0 22 0M15 31V62" fill="none" stroke="#6f84a8" stroke-width="2.4" stroke-linecap="round"/>
+      <rect x="4" y="62" width="22" height="5" rx="2" fill="#6f84a8"/>
+      <rect x="8" y="2" width="14" height="26" rx="7" fill="#f4f7fb" stroke="#6f84a8" stroke-width="1.5"/>
+      <path d="M11 10h8M11 14h8M11 18h8" stroke="#9fb0c9" stroke-width="1"/>
+    </symbol>
+    <symbol id="s-check" viewBox="0 0 12 12"><circle cx="6" cy="6" r="6" fill="#12a26f"/><path d="M3.2 6.2l2 2 3.6-4" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <!-- 応用の4領域 -->
+    <symbol id="s-cosme" viewBox="0 0 64 64">
+      <path d="M12 26V12l12-7v21z" fill="#ff3f7a"/><rect x="10" y="26" width="16" height="9" fill="#c9d6ea"/>
+      <rect x="7" y="35" width="22" height="24" rx="3" fill="#26324d"/>
+      <rect x="35" y="40" width="24" height="19" rx="4" fill="#ffd0c2" stroke="#51688f" stroke-width="1.5"/><rect x="33" y="34" width="28" height="8" rx="3" fill="#f4f7fb" stroke="#51688f" stroke-width="1.5"/>
+    </symbol>
+    <symbol id="s-food" viewBox="0 0 64 64">
+      <path d="M17.6 30H46.4L43 60H21z" fill="#ffb347"/>
+      <path d="M36 50L48 4" stroke="#51688f" stroke-width="3" stroke-linecap="round"/>
+      <path d="M14 14H50L43 60H21z" fill="none" stroke="#51688f" stroke-width="2" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="s-lab" viewBox="0 0 64 64">
+      <rect x="9" y="30" width="10" height="26" rx="5" fill="#5fd0ff"/><rect x="27" y="30" width="10" height="26" rx="5" fill="#c9a2ff"/><rect x="45" y="30" width="10" height="26" rx="5" fill="#5fdca6"/>
+      <rect x="8" y="6" width="12" height="51" rx="6" fill="none" stroke="#51688f" stroke-width="1.8"/><rect x="26" y="6" width="12" height="51" rx="6" fill="none" stroke="#51688f" stroke-width="1.8"/><rect x="44" y="6" width="12" height="51" rx="6" fill="none" stroke="#51688f" stroke-width="1.8"/>
+      <rect x="3" y="36" width="58" height="6" rx="3" fill="#6f84a8"/>
+    </symbol>
+    <symbol id="s-paint" viewBox="0 0 64 64">
+      <path d="M10 22a22 22 0 0 1 44 0" fill="none" stroke="#6f84a8" stroke-width="2.5"/>
+      <rect x="10" y="22" width="44" height="38" rx="4" fill="#f4f7fb" stroke="#6f84a8" stroke-width="1.5"/>
+      <rect x="10" y="34" width="44" height="13" fill="#19c9a0"/>
+      <ellipse cx="32" cy="22" rx="22" ry="6.5" fill="#19c9a0" stroke="#6f84a8" stroke-width="1.5"/>
+      <rect x="43" y="22" width="6" height="18" rx="3" fill="#19c9a0"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="sheet">
+  <header>
+    <div>
+      <div class="eyebrow">フィジカルAI デモ　｜　調合AIロボット</div>
+      <h1>話しかけると、ロボットが色をつくる</h1>
+      <p class="lead">つくりたい色を伝えると、AIが色材と量を決め、ロボットと電動ピペットがレジンの色を調合します。</p>
+    </div>
+    <div class="pa">
+      <b>フィジカルAI ＝ 現実世界で「動く」AI</b>
+      <div class="flow3"><span>見る</span>→<span>考える</span>→<span>動く</span></div>
+      <p>カメラやマイクで状況をとらえ、AIが何をすべきかを判断し、ロボットや機器が実際の作業を行います。</p>
+    </div>
+  </header>
+
+  <main>
+    <section class="steps">
+      <h2><b>デモの流れ</b>色を伝えてから、お土産を受け取るまでの4ステップ</h2>
+      <div class="cards4">
+
+        <div class="step">
+          <h3><span class="num">1</span>声か色見本で、色を伝える</h3>
+          <svg viewBox="0 0 264 112" role="img" aria-label="マイクに話す人と、カメラの下に置いた色見本">
+            <line x1="4" y1="105" x2="118" y2="105" stroke="#51688f" stroke-width="1.6"/>
+            <use href="#s-person" x="8" y="48" width="38" height="57" fill="#9db7dc"/>
+            <path d="M32 34l-3 11 13-11z" fill="#fff" stroke="#0C5FB0" stroke-width="1.6" stroke-linejoin="round"/>
+            <rect x="5" y="6" width="120" height="30" rx="14" fill="#fff" stroke="#0C5FB0" stroke-width="1.6"/>
+            <path d="M31 34.5h10" stroke="#fff" stroke-width="3"/>
+            <text x="65" y="26" text-anchor="middle" font-size="13">「紫色をつくって」</text>
+            <path d="M54 63a16 16 0 0 1 0 22M62 56a27 27 0 0 1 0 36" fill="none" stroke="#3aa8ff" stroke-width="2.5" stroke-linecap="round"/>
+            <use href="#s-mic" x="84" y="43" width="27" height="63"/>
+            <line x1="134" y1="6" x2="134" y2="106" stroke="#cfdcee" stroke-width="1.5" stroke-dasharray="3 4"/>
+            <circle cx="134" cy="56" r="15" fill="#f1f6fc" stroke="#cfdcee" stroke-width="1.5"/>
+            <text x="134" y="59.5" text-anchor="middle" font-size="9">または</text>
+            <line x1="152" y1="105" x2="260" y2="105" stroke="#51688f" stroke-width="1.6"/>
+            <path d="M162 105V18h22" fill="none" stroke="#6f84a8" stroke-width="3.5" stroke-linecap="round"/>
+            <path d="M206 50L180 96h52z" fill="#3aa8ff" opacity=".22"/>
+            <use href="#s-cam" x="178" y="6" width="56" height="45"/>
+            <rect x="178" y="95" width="56" height="9" rx="2" fill="#a259ff"/>
+            <text x="246" y="92" text-anchor="middle" font-size="9.5" style="fill:#51688f">色見本</text>
+          </svg>
+          <p>つくりたい色を声で伝えるか、色見本をカメラに見せます。</p>
+        </div>
+
+        <div class="step">
+          <h3><span class="num">2</span>AIが、色材と量を決める</h3>
+          <svg viewBox="0 0 264 112" role="img" aria-label="目標の紫色からAIが赤と青のレシピを決める">
+            <circle cx="34" cy="48" r="27" fill="#a259ff" stroke="#fff" stroke-width="2"/><circle cx="34" cy="48" r="28" fill="none" stroke="#7b3fd6" stroke-width="1.2"/>
+            <text x="34" y="96" text-anchor="middle" font-size="11">目標の色</text>
+            <path d="M70 48h12" stroke="#0C5FB0" stroke-width="2.5" stroke-linecap="round"/><path d="M82 42l8 6-8 6z" fill="#0C5FB0"/>
+            <use href="#s-ai" x="94" y="19" width="58" height="58"/>
+            <text x="123" y="96" text-anchor="middle" font-size="11">AIが決める</text>
+            <path d="M156 48h10" stroke="#0C5FB0" stroke-width="2.5" stroke-linecap="round"/><path d="M166 42l8 6-8 6z" fill="#0C5FB0"/>
+            <rect x="180" y="5" width="80" height="102" rx="8" fill="#fff" stroke="#cfdcee" stroke-width="1.5"/>
+            <rect x="185" y="11" width="18" height="26" rx="4" fill="none" stroke="#0C5FB0" stroke-width="1.6"/><rect x="203.5" y="11" width="18" height="26" rx="4" fill="none" stroke="#0C5FB0" stroke-width="1.6"/>
+            <use href="#s-bottle" x="187" y="13" width="14" height="22" color="#ff3f7a"/><use href="#s-bottle" x="205.500" y="13" width="14" height="22" color="#2d7dff"/>
+            <use href="#s-bottle" x="224" y="13" width="14" height="22" color="#ffc93c" opacity=".35"/><use href="#s-bottle" x="242" y="13" width="14" height="22" color="#dfe7f5" opacity=".5"/>
+            <circle cx="191" cy="52" r="4.5" fill="#ff3f7a"/><rect x="200" y="48" width="54" height="8" rx="4" fill="#e3ebf6"/><rect x="200" y="48" width="34" height="8" rx="4" fill="#ff3f7a"/>
+            <circle cx="191" cy="68" r="4.5" fill="#2d7dff"/><rect x="200" y="64" width="54" height="8" rx="4" fill="#e3ebf6"/><rect x="200" y="64" width="21" height="8" rx="4" fill="#2d7dff"/>
+            <line x1="186" y1="80" x2="254" y2="80" stroke="#cfdcee"/>
+            <text x="220" y="98" text-anchor="middle" font-size="13" style="font-weight:900">赤 ＋ 青</text>
+          </svg>
+          <p>AIが目標の色を理解し、使う色材とその量を決めます。</p>
+        </div>
+
+        <div class="step">
+          <h3><span class="num">3</span>ロボットが分注し、混ぜる</h3>
+          <svg viewBox="0 0 264 112" role="img" aria-label="ロボットが電動ピペットで色材を調合容器に入れる">
+            <line x1="14" y1="105" x2="254" y2="105" stroke="#51688f" stroke-width="1.6"/>
+            <use href="#s-bottle" x="26" y="70" width="23" height="35" color="#ff3f7a"/><use href="#s-bottle" x="56" y="70" width="23" height="35" color="#2d7dff"/>
+            <text x="52" y="62" text-anchor="middle" font-size="10" style="fill:#51688f">色材</text>
+            <use href="#s-cup" x="100" y="52" width="62" height="53" color="#b069e6"/>
+            <path d="M118 88a14 5 0 0 1 26 0M124 94a9 3 0 0 0 16 0" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" opacity=".75"/>
+            <use href="#s-arm" x="103" y="-16" width="132" height="121" color="#ff3f7a"/>
+            <circle cx="136" cy="81" r="2.2" fill="#ff3f7a"/>
+            <text x="222" y="22" text-anchor="middle" font-size="10" style="fill:#51688f">電動ピペット</text>
+            <path d="M190 19L146 36" stroke="#9fb0c9" stroke-width="1"/>
+          </svg>
+          <p>ロボットと電動ピペットが、色材を取り分けて混ぜ合わせます。</p>
+        </div>
+
+        <div class="step">
+          <h3><span class="num">4</span>言葉で微調整。固めてお土産に</h3>
+          <svg viewBox="0 0 264 112" role="img" aria-label="もう少し薄くと伝えて色を調整し、UVライトで固めて受け取る">
+            <line x1="4" y1="105" x2="124" y2="105" stroke="#51688f" stroke-width="1.6"/>
+            <path d="M32 34l-3 11 13-11z" fill="#fff" stroke="#0C5FB0" stroke-width="1.6" stroke-linejoin="round"/>
+            <rect x="5" y="6" width="116" height="30" rx="14" fill="#fff" stroke="#0C5FB0" stroke-width="1.6"/>
+            <path d="M31 34.5h10" stroke="#fff" stroke-width="3"/>
+            <text x="63" y="26" text-anchor="middle" font-size="13">「もう少し薄く」</text>
+            <use href="#s-cup" x="12" y="66" width="46" height="39" color="#a259ff"/>
+            <path d="M64 86h10" stroke="#0C5FB0" stroke-width="2.5" stroke-linecap="round"/><path d="M74 80l8 6-8 6z" fill="#0C5FB0"/>
+            <use href="#s-cup" x="88" y="66" width="46" height="39" color="#d9bfff"/>
+            <line x1="146" y1="6" x2="146" y2="106" stroke="#cfdcee" stroke-width="1.5" stroke-dasharray="3 4"/>
+            <line x1="156" y1="105" x2="260" y2="105" stroke="#51688f" stroke-width="1.6"/>
+            <path d="M166 105V20h24" fill="none" stroke="#6f84a8" stroke-width="3.5" stroke-linecap="round"/>
+            <path d="M196 34L176 97h40z" fill="#8a5cff" opacity=".25"/>
+            <path d="M184 14h24l9 15h-42z" fill="#26324d"/><rect x="178" y="29" width="36" height="5" rx="2" fill="#b79cff"/>
+            <text x="196" y="10" text-anchor="middle" font-size="9.5" style="fill:#51688f">UVライト</text>
+            <rect x="180" y="97" width="32" height="8" rx="3" fill="#9fb0c9"/><rect x="186" y="90" width="20" height="9" rx="4" fill="#d9bfff" stroke="#7b3fd6" stroke-width="1"/>
+            <path d="M218 78h6" stroke="#0C5FB0" stroke-width="2.5" stroke-linecap="round"/><path d="M224 72l8 6-8 6z" fill="#0C5FB0"/>
+            <rect x="236" y="66" width="22" height="22" rx="6" fill="#d9bfff" stroke="#7b3fd6" stroke-width="1.4"/><path d="M241 73l5-3" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+            <path d="M247 52l1.6 4.4 4.4 1.6-4.4 1.6-1.6 4.4-1.6-4.4-4.4-1.6 4.4-1.6zM258 58l1 2.6 2.6 1-2.6 1-1 2.6-1-2.6-2.6-1 2.6-1z" fill="#ffc93c"/>
+            <text x="247" y="100" text-anchor="middle" font-size="9.5" style="fill:#51688f">お土産</text>
+          </svg>
+          <p>「もう少し薄く」の微調整もできます。完成した色は固めてお渡しします。</p>
+        </div>
+
+      </div>
+    </section>
+
+    <section class="row2">
+      <div class="box">
+        <h3><span class="tag">しくみ</span>AIは「動きを作る」のではなく、「検証済みの動きを選ぶ」</h3>
+        <div class="flow">
+          <div class="node n-person">
+            <svg width="30" height="45" viewBox="0 0 40 60"><use href="#s-person" fill="#9db7dc"/></svg>
+            <b>人</b><small>声・色見本</small>
+          </div>
+          <i class="arr"></i>
+          <div class="node n-ai">
+            <svg width="46" height="46" viewBox="0 0 60 60"><use href="#s-ai"/></svg>
+            <b>AIエージェント</b><small>大規模言語モデル<br>（LLM）</small>
+          </div>
+          <i class="arr"></i>
+          <div class="node n-skill">
+            <div class="chips">
+              <span><svg class="ck"><use href="#s-check"/></svg>色認識</span>
+              <span><svg class="ck"><use href="#s-check"/></svg>ロボット移動</span>
+              <span><svg class="ck"><use href="#s-check"/></svg>色材分注</span>
+              <span><svg class="ck"><use href="#s-check"/></svg>混合・撹拌</span>
+            </div>
+            <b>登録済みスキル</b><small>あらかじめ実装・検証した作業の部品</small>
+          </div>
+          <i class="arr"></i>
+          <div class="node n-robot">
+            <svg width="62" height="57" viewBox="0 0 120 110"><use href="#s-arm" color="#ff3f7a"/></svg>
+            <b>ロボット・機器</b><small>電動ピペット<br>カメラ</small>
+          </div>
+        </div>
+        <div class="roles"><span class="r1">判断と手順 ＝ AI</span><span class="r2">動作 ＝ 検証済みスキル</span></div>
+        <p class="note">AIエージェントが指示を読み解き、必要なスキルを選んで手順を組みます。スキルは、ロボットエンジニアがあらかじめ作り、検証した作業機能です。</p>
+      </div>
+
+      <div class="box">
+        <h3><span class="tag">特長</span>言葉で変更・安定動作・後付け</h3>
+        <div class="feats">
+          <div class="feat"><span class="num">1</span><div><b>言葉で作業を変更</b><span>プログラムを書き換えず、言葉で作業内容を変えられます。</span></div></div>
+          <div class="feat"><span class="num">2</span><div><b>検証済みスキルで安定した動作</b><span>色の認識、移動、分注、撹拌など、一つひとつが確実に動くよう作られています。</span></div></div>
+          <div class="feat"><span class="num">3</span><div><b>既存のロボットにも後付け</b><span>スキルとして組み込めば、今あるロボットにも適用できます。</span></div></div>
+        </div>
+        <p class="foot">作業が変わるたびの「教え直し」を、AIが指示を理解することで減らします。</p>
+      </div>
+
+      <div class="box">
+        <h3><span class="tag warn">展開イメージ</span>「配合・調合」のある現場へ</h3>
+        <div class="apps">
+          <div class="app"><svg viewBox="0 0 64 64"><use href="#s-cosme"/></svg><div><b>化粧品</b><span>色や香りの試作</span></div></div>
+          <div class="app"><svg viewBox="0 0 64 64"><use href="#s-food"/></svg><div><b>食品・飲料</b><span>味や香りの試作</span></div></div>
+          <div class="app"><svg viewBox="0 0 64 64"><use href="#s-lab"/></svg><div><b>創薬・分析ラボ</b><span>試薬の分注</span></div></div>
+          <div class="app"><svg viewBox="0 0 64 64"><use href="#s-paint"/></svg><div><b>塗料・樹脂</b><span>工業製品の調色</span></div></div>
+        </div>
+        <p class="caveat">※ 対象材料に応じた機器・スキル・評価方法の開発が必要です。材料ごとに機器とスキルを用意し、現場に合わせて設計します。</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="cta">あなたの現場で、試したい「調合」は？<span>ブーススタッフへお声がけください</span></div>
+    <div class="org">伊藤忠テクノソリューションズ × 豆蔵</div>
+  </footer>
+</div>
+
+<script>
+// 画面では 1 枚をウィンドウいっぱいに収めて中央に置く（印刷時は CSS 側で A4 横に組み直す）
+(() => {
+  const a4 = /[?#&]paper=a4\b/i.test(location.search + location.hash);
+  const root = document.documentElement;
+  if (a4) root.classList.add('a4');
+  // 印刷の間だけ A4 用の文字サイズに切り替える
+  addEventListener('beforeprint', () => root.classList.add('a4'));
+  addEventListener('afterprint', () => { if (!a4) root.classList.remove('a4'); });
+  const sheet = document.querySelector('.sheet'), W = 1280, H = a4 ? 905 : 720;
+  const fit = () => {
+    const s = Math.min(innerWidth / W, innerHeight / H) || 1;
+    sheet.style.transform = `translate(${(innerWidth - W * s) / 2}px, ${(innerHeight - H * s) / 2}px) scale(${s})`;
+  };
+  addEventListener('resize', fit);
+  fit();
+})();
+</script>
+</body>
+</html>

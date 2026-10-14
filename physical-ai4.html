@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>調合AIロボット 解説動画 ― 第4章「応用例」・案内</title>
+<style>
+  html, body { height: 100%; margin: 0; background: #01060f; overflow: hidden; }
+  body { display: flex; align-items: center; justify-content: center; }
+  canvas { display: block; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1280" height="720"></canvas>
+<script>
+(() => {
+'use strict';
+
+/* ------------------------------------------------------------------
+   調合AIロボット 解説動画  第4章「応用例」・案内 (02:20–03:05)
+   前は physical-ai3.html（第3章）。動画全体ではこのあと OP（physical-ai1.html）へ戻る。
+   1280×720 の座標系で全てをコード描画し、ウィンドウに合わせて拡大する。
+   操作不要で自動再生・ループ。時刻は動画全体（3分05秒）の時刻で扱う。
+   確認用: Space=一時停止 / ←→=1秒移動 / ↑↓=テンポ調整 / Home=頭へ
+           #t=秒 で静止表示（140〜185）
+   テンポ: 下のほうにある SLOW（表示時間の倍率）で変える。URL に #slow=1.5 と付けても変わる。
+   index.html が physical-ai1〜4 を順に連続再生する。
+   ------------------------------------------------------------------ */
+
+const W = 1280, H = 720;
+const T0 = 140, T1 = 185, LOOP = T1 - T0;   // このファイルが受け持つ区間（動画全体の時刻・秒）
+const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+let K = 1;
+
+// 色はここだけで定義（KVテンプレートに合わせて差し替える想定）
+const C = {
+  bg0: '#050f26', bg1: '#0a2a63', blue: '#0C5FB0', sky: '#3aa8ff', cyan: '#7fe7ff',
+  dim: '#a9bedf', red: '#ff3f7a', ink: '#2d7dff', purple: '#a259ff', lilac: '#c9a2ff',
+  yellow: '#ffd34d', orange: '#f29a2e', dark: '#06142e', body: '#eef3fb', edge: '#8fa6c8'
+};
+const FF = '"BIZ UDPGothic","BIZ UDGothic","Yu Gothic UI","Yu Gothic","Meiryo","Hiragino Sans","Noto Sans JP",sans-serif';
+
+// セリフ（字幕として画面の下部に出す）。[開始, 終了, 1行目, 2行目]。2行目が空なら1行で出す。
+// 時刻は動画全体の時刻（秒）。実際に表示される長さは、これにテンポ（SLOW）を掛けたものになる。
+// テンポ ×2.0 のとき、1枚の表示が約3〜11秒、読む速さが1秒あたり4文字以内になるよう区切ってある。
+const SUBS = [
+  [140, 143, 'どの材料を、どれだけ混ぜるか。', ''],
+  [143, 145.4, '試作を並べて、見比べる。', ''],
+  [145.4, 148, 'その判断は、熟練者の経験に', '頼りがちです。'],
+  [148, 152, '化粧品なら、色や香りの試作に。', '「赤みを抑えて」'],
+  [152, 156, '「香りを控えめに」', '少しずつ変えて試す作業に。'],
+  [156, 159.4, '食品や飲料の試作にも。', '「甘さを控えめに」'],
+  [159.4, 161.4, '人が味や香りを評価して、', ''],
+  [161.4, 164, '次の配合へ。試作を重ねます。', ''],
+  [164, 167, '創薬・分析ラボでは、', '試薬の分注に。'],
+  [167, 170, '塗料や樹脂では、', '目標の色に合わせる調色に。'],
+  [170, 175, '材料ごとに機器とスキルを用意し、', '現場に合わせて設計します。'],
+  [175, 178.6, 'あなたの現場には、', 'どんな「調合」がありますか。'],
+  [178.6, 182, '試してみたい作業や課題を、', 'お聞かせください。'],
+  [182, 185, 'ブーススタッフが、ご案内します。', '']
+];
+// 画面左上の章名（開始秒, 表示名）
+const CH_LABEL = [[140, '④ 応用例'], [175, '案内']];
+// 動画全体（3分05秒）の章立て。進み具合バーに使う
+const CHAPTERS = [['OP', 10], ['①', 35], ['②', 40], ['③', 55], ['④', 35], ['案内', 10]];
+
+/* ---------- 基本ユーティリティ ---------- */
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const frac = x => x - Math.floor(x);
+const eio = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const eo = x => 1 - Math.pow(1 - x, 3);
+const back = x => 1 + 2.70158 * Math.pow(x - 1, 3) + 1.70158 * Math.pow(x - 1, 2);
+const win = (t, a, b, d = .3) => Math.min(prog(t, a, a + d), 1 - prog(t, b, b + d));
+const hex = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+const rgba = (h, a) => { const c = hex(h); return `rgba(${c[0]},${c[1]},${c[2]},${clamp(a)})`; };
+const mix = (a, b, t) => {
+  const A = hex(a), B = hex(b);
+  return '#' + A.map((v, i) => Math.round(lerp(v, B[i], clamp(t))).toString(16).padStart(2, '0')).join('');
+};
+
+/* ---------- 描画ヘルパー ---------- */
+const font = (px, w = 700) => `${w} ${px}px ${FF}`;
+function text(s, x, y, px, color, o = {}) {
+  ctx.font = font(px, o.w || 700);
+  ctx.textAlign = o.align || 'center';
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillStyle = color;
+  ctx.fillText(s, x, y);
+}
+function rr(x, y, w, h, r) {
+  r = Math.max(0, Math.min(r, w / 2, h / 2));
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+function line(x1, y1, x2, y2) { ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); }
+function circ(x, y, r) { ctx.beginPath(); ctx.arc(x, y, Math.max(0, r), 0, Math.PI * 2); }
+function glow(c, b) { ctx.shadowColor = c; ctx.shadowBlur = b * K; }
+function noglow() { ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; }
+// 透明度を掛け合わせて描く / 中心基準で拡縮して描く
+function A(a, fn) { if (a <= .004) return; ctx.save(); ctx.globalAlpha *= clamp(a); fn(); ctx.restore(); }
+function P(cx, cy, sc, fn) { ctx.save(); ctx.translate(cx, cy); ctx.scale(sc, sc); ctx.translate(-cx, -cy); fn(); ctx.restore(); }
+
+function panel(x, y, w, h, title, acc, hi = 0, tc = C.dark) {
+  ctx.save();
+  if (hi > 0) glow(rgba(acc, .45 * hi), 24);
+  rr(x, y, w, h, 18); ctx.fillStyle = 'rgba(16,36,80,.86)'; ctx.fill();
+  ctx.restore();
+  rr(x, y, w, h, 18); ctx.strokeStyle = rgba(acc, .35 + .65 * hi); ctx.lineWidth = 1.5 + 1.5 * hi; ctx.stroke();
+  ctx.font = font(19, 700);
+  const tw = ctx.measureText(title).width;
+  rr(x + 14, y + 12, tw + 28, 32, 16); ctx.fillStyle = acc; ctx.fill();
+  text(title, x + 28, y + 35, 19, tc, { align: 'left' });
+}
+
+function bubble(x, y, w, h, str, px, o = {}) {
+  const tx = o.tx != null ? o.tx : x + w * .25;
+  ctx.save();
+  ctx.fillStyle = '#ffffff';
+  glow('rgba(0,0,0,.35)', 10);
+  rr(x, y, w, h, h / 2.4); ctx.fill();
+  noglow();
+  ctx.beginPath();
+  ctx.moveTo(tx - 9, y + h - 2); ctx.lineTo(tx + 9, y + h - 2); ctx.lineTo(o.px != null ? o.px : tx - 8, y + h + 16);
+  ctx.closePath(); ctx.fill();
+  ctx.restore();
+  text(str, x + w / 2, y + h / 2 + px * .36, px, '#0a1d44', { w: 700 });
+}
+
+function aiBadge(cx, cy, r, pulse = 0) {
+  ctx.save();
+  if (pulse > 0) {
+    ctx.strokeStyle = rgba(C.lilac, .75 * (1 - pulse)); ctx.lineWidth = 3;
+    circ(cx, cy, r + pulse * r * .7); ctx.stroke();
+  }
+  glow(rgba(C.purple, .8), 14);
+  const g = ctx.createLinearGradient(cx - r, cy - r, cx + r, cy + r);
+  g.addColorStop(0, C.sky); g.addColorStop(1, C.purple);
+  ctx.fillStyle = g; circ(cx, cy, r); ctx.fill();
+  noglow();
+  ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = Math.max(1, r * .06); circ(cx, cy, r); ctx.stroke();
+  ctx.restore();
+  text('AI', cx, cy + r * .28, r * .8, '#fff', { w: 900 });
+}
+
+function chev(cx, cy, sz, T, col, a = 1) {
+  ctx.save();
+  ctx.lineWidth = sz * .28; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  for (let i = 0; i < 3; i++) {
+    const ph = frac(T * 1.2 - i * .22);
+    ctx.strokeStyle = rgba(col, a * (.25 + .75 * Math.max(0, 1 - Math.abs(ph - .5) * 2.4)));
+    const x = cx + (i - 1) * sz * .8;
+    ctx.beginPath(); ctx.moveTo(x - sz * .3, cy - sz * .55); ctx.lineTo(x + sz * .3, cy); ctx.lineTo(x - sz * .3, cy + sz * .55); ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function star(x, y, r, a) {
+  A(a, () => {
+    ctx.fillStyle = '#fff'; ctx.beginPath();
+    for (let i = 0; i < 8; i++) { const q = i % 2 ? r * .28 : r, an = i * Math.PI / 4; ctx.lineTo(x + Math.cos(an) * q, y + Math.sin(an) * q); }
+    ctx.closePath(); ctx.fill();
+  });
+}
+
+/* ---------- 部品：人・容器・ピペット・ロボット ---------- */
+function person(x, by, s, col) {
+  ctx.fillStyle = col;
+  circ(x, by - 92 * s, 17 * s); ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(x - 28 * s, by); ctx.lineTo(x - 28 * s, by - 46 * s);
+  ctx.quadraticCurveTo(x - 28 * s, by - 70 * s, x, by - 70 * s);
+  ctx.quadraticCurveTo(x + 28 * s, by - 70 * s, x + 28 * s, by - 46 * s);
+  ctx.lineTo(x + 28 * s, by); ctx.closePath(); ctx.fill();
+}
+
+// ビーカー型の容器。level=液面の高さ(0..1)
+function cup(cx, by, w, h, col, level, o = {}) {
+  const x = cx - w / 2, y = by - h, r = Math.min(w * .18, 16), lw = o.lw || 2.5;
+  const path = () => {
+    ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, by - r); ctx.quadraticCurveTo(x, by, x + r, by);
+    ctx.lineTo(x + w - r, by); ctx.quadraticCurveTo(x + w, by, x + w, by - r); ctx.lineTo(x + w, y);
+  };
+  ctx.save();
+  path(); ctx.closePath(); ctx.clip();
+  ctx.fillStyle = 'rgba(255,255,255,.06)'; ctx.fillRect(x, y, w, h);
+  const ly = by - h * level, wv = o.wave || 0, ph = o.ph || 0;
+  ctx.save();
+  ctx.globalAlpha *= (o.la || 1);
+  ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(x, by);
+  for (let i = 0; i <= 24; i++) ctx.lineTo(x + w * i / 24, ly + Math.sin(i * .8 + ph) * wv);
+  ctx.lineTo(x + w, by); ctx.closePath(); ctx.fill();
+  ctx.restore();
+  if (o.inner) o.inner(x, ly, w, by - ly);
+  ctx.restore();
+  ctx.save();
+  ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  path(); ctx.strokeStyle = 'rgba(255,255,255,.82)'; ctx.lineWidth = lw; ctx.stroke();
+  ctx.strokeStyle = 'rgba(255,255,255,.3)'; line(x + w * .15, y + h * .14, x + w * .15, by - h * .2);
+  ctx.restore();
+}
+
+function bottle(cx, by, w, h, col) {
+  const x = cx - w / 2, y = by - h;
+  ctx.fillStyle = rgba(col, .95); rr(x + 1.5, y + h * .35, w - 3, h * .65 - 1.5, 3); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,.82)'; ctx.lineWidth = 1.8; rr(x, y, w, h, 4); ctx.stroke();
+}
+
+// 電動ピペット。(x,y)=上端中央、先端は y+len
+function pipette(x, y, len, s, col, fill) {
+  const bh = len * .44, sh = len * .14, th = len - bh - sh, ty = y + bh + sh;
+  ctx.fillStyle = '#26324d'; rr(x - 10 * s, y, 20 * s, bh, 5 * s); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 1 * s; rr(x - 10 * s, y, 20 * s, bh, 5 * s); ctx.stroke();
+  ctx.fillStyle = C.cyan; ctx.fillRect(x - 5 * s, y + bh * .55, 10 * s, 3 * s);
+  ctx.fillStyle = '#c9d6ea'; ctx.fillRect(x - 4 * s, y + bh, 8 * s, sh);
+  const tip = () => { ctx.beginPath(); ctx.moveTo(x - 5 * s, ty); ctx.lineTo(x + 5 * s, ty); ctx.lineTo(x + 1.6 * s, ty + th); ctx.lineTo(x - 1.6 * s, ty + th); ctx.closePath(); };
+  tip(); ctx.fillStyle = 'rgba(255,255,255,.22)'; ctx.fill();
+  if (col && fill > 0) {
+    ctx.save(); tip(); ctx.clip();
+    ctx.fillStyle = col; ctx.fillRect(x - 6 * s, ty + th * (1 - fill * .88), 12 * s, th);
+    ctx.restore();
+  }
+  tip(); ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.lineWidth = 1.2 * s; ctx.stroke();
+}
+
+// 2リンクのロボットアーム。(bx,by)=台座の接地点、(tx,ty)=ツール先端の目標
+function arm(bx, by, tx, ty, o = {}) {
+  const s = o.s || 1, L1 = (o.L1 || 130) * s, L2 = (o.L2 || 125) * s, tl = (o.tool || 70) * s;
+  const body = o.body || C.body, edge = o.edge || C.edge, acc = o.acc || C.sky;
+  const sx = bx, sy = by - 46 * s;
+  let wx = tx, wy = ty - tl, dx = wx - sx, dy = wy - sy, d = Math.hypot(dx, dy);
+  const mx = L1 + L2 - 1;
+  if (d > mx) { dx *= mx / d; dy *= mx / d; d = mx; wx = sx + dx; wy = sy + dy; }
+  const a = Math.atan2(dy, dx), b = Math.acos(clamp((L1 * L1 + d * d - L2 * L2) / (2 * L1 * d), -1, 1));
+  let ex = sx + Math.cos(a + b) * L1, ey = sy + Math.sin(a + b) * L1;
+  const ex2 = sx + Math.cos(a - b) * L1, ey2 = sy + Math.sin(a - b) * L1;
+  if (ey2 < ey) { ex = ex2; ey = ey2; }
+
+  ctx.save();
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.fillStyle = edge; rr(bx - 36 * s, by - 14 * s, 72 * s, 14 * s, 4 * s); ctx.fill();
+  ctx.fillStyle = body; rr(bx - 22 * s, by - 52 * s, 44 * s, 42 * s, 8 * s); ctx.fill();
+  const link = (x1, y1, x2, y2, w) => {
+    ctx.strokeStyle = edge; ctx.lineWidth = w + 3 * s; line(x1, y1, x2, y2);
+    ctx.strokeStyle = body; ctx.lineWidth = w; line(x1, y1, x2, y2);
+  };
+  const joint = (x, y, r) => {
+    ctx.fillStyle = edge; circ(x, y, r + 1.5 * s); ctx.fill();
+    ctx.fillStyle = body; circ(x, y, r); ctx.fill();
+    ctx.fillStyle = acc; circ(x, y, r * .42); ctx.fill();
+  };
+  link(sx, sy, ex, ey, 24 * s); link(ex, ey, wx, wy, 19 * s);
+  joint(sx, sy, 15 * s); joint(ex, ey, 12.5 * s);
+  if (o.grip) {
+    ctx.fillStyle = '#b4c0d6'; rr(wx - 11 * s, wy + 4 * s, 22 * s, 12 * s, 3 * s); ctx.fill();
+    ctx.strokeStyle = '#b4c0d6'; ctx.lineWidth = 5 * s;
+    line(wx - 12 * s, wy + 14 * s, wx - 12 * s, wy + tl); line(wx + 12 * s, wy + 14 * s, wx + 12 * s, wy + tl);
+  } else {
+    pipette(wx, wy, tl, s, o.liq, o.fill || 0);
+  }
+  joint(wx, wy, 10 * s);
+  ctx.restore();
+  return { x: wx, y: wy + tl };
+}
+
+// 「吸う→運ぶ→出す」1サイクルの先端位置。A=吸う位置、B=出す位置、lift=移動時の高さ
+function cyc(u, Ax, Ay, Bx, By, lift) {
+  const sg = (a, b) => eio(prog(u, a, b));
+  let x, y;
+  if (u < .12) { x = lerp(Bx, Ax, sg(0, .12)); y = lift; }
+  else if (u < .2) { x = Ax; y = lerp(lift, Ay, sg(.12, .2)); }
+  else if (u < .36) { x = Ax; y = Ay; }
+  else if (u < .44) { x = Ax; y = lerp(Ay, lift, sg(.36, .44)); }
+  else if (u < .58) { x = lerp(Ax, Bx, sg(.44, .58)); y = lift; }
+  else if (u < .66) { x = Bx; y = lerp(lift, By, sg(.58, .66)); }
+  else if (u < .84) { x = Bx; y = By; }
+  else { x = Bx; y = lerp(By, lift, sg(.84, 1)); }
+  const fill = u < .5 ? prog(u, .2, .36) : 1 - prog(u, .66, .84);
+  return { x, y, fill, disp: prog(u, .66, .84) };
+}
+function drip(c, col, toY) {
+  if (c.disp > 0 && c.disp < 1) { ctx.strokeStyle = col; ctx.lineWidth = 2.2; ctx.lineCap = 'round'; line(c.x, c.y, c.x, toY); }
+}
+
+/* ---------- 常設要素 ---------- */
+function background(T) {
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, C.bg0); g.addColorStop(1, C.bg1);
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  const ox = W * .5 + Math.sin(T * Math.PI * 2 / BGP) * 120;
+  const rg = ctx.createRadialGradient(ox, 340, 0, ox, 340, 640);
+  rg.addColorStop(0, 'rgba(12,95,176,.42)'); rg.addColorStop(1, 'rgba(12,95,176,0)');
+  ctx.fillStyle = rg; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = 'rgba(255,255,255,.05)';
+  for (let y = 100; y < 540; y += 40) for (let x = 20 + ((y / 40) % 2) * 20; x < W; x += 40) ctx.fillRect(x, y, 2, 2);
+}
+
+function header(T) {
+  const [st, label] = CH_LABEL.filter(c => T >= c[0]).pop();
+  ctx.font = font(21, 700);
+  const tw = ctx.measureText(label).width;
+  const fl = 1 - prog(T, st, st + .8);
+  ctx.save();
+  if (st > 0 && fl > 0) glow(rgba(C.cyan, fl), 22);
+  rr(64, 40, tw + 36, 36, 18); ctx.fillStyle = C.blue; ctx.fill();
+  ctx.restore();
+  rr(64, 40, tw + 36, 36, 18); ctx.strokeStyle = 'rgba(255,255,255,.4)'; ctx.lineWidth = 1.5; ctx.stroke();
+  text(label, 82, 65, 21, '#fff', { align: 'left' });
+
+  const x0 = 400, x1 = 1216, gap = 5, total = 185, bw = x1 - x0 - gap * (CHAPTERS.length - 1);
+  let x = x0, acc = 0;
+  for (const [n, d] of CHAPTERS) {
+    const w = bw * d / total, f = clamp((T - acc) / d), cur = T >= acc && T < acc + d;
+    rr(x, 62, w, 7, 3.5); ctx.fillStyle = 'rgba(255,255,255,.18)'; ctx.fill();
+    if (f > 0) { rr(x, 62, Math.max(7, w * f), 7, 3.5); ctx.fillStyle = cur ? C.cyan : C.sky; ctx.fill(); }
+    text(n, x + w / 2, 54, cur ? 16 : 14, cur ? '#fff' : 'rgba(255,255,255,.5)', { w: cur ? 700 : 500 });
+    x += w + gap; acc += d;
+  }
+}
+
+function telop(str, T, t0, t1, px = 40) {
+  const a = Math.min(prog(T, t0, t0 + .5), 1 - prog(T, t1 - .35, t1));
+  if (a <= 0) return;
+  ctx.save();
+  ctx.globalAlpha = a;
+  const y = 128 + (1 - eo(prog(T, t0, t0 + .5))) * 10;
+  text(str, 640, y, px, '#fff', { w: 900 });
+  const tw = ctx.measureText(str).width, uw = tw * eo(prog(T, t0 + .2, t0 + .9));
+  const g = ctx.createLinearGradient(640 - tw / 2, 0, 640 + tw / 2, 0);
+  g.addColorStop(0, C.cyan); g.addColorStop(1, C.purple);
+  ctx.fillStyle = g; ctx.fillRect(640 - uw / 2, y + 13, uw, 4);
+  ctx.restore();
+}
+
+function subtitle(T) {
+  rr(170, 552, 940, 100, 14); ctx.fillStyle = 'rgba(2,8,22,.8)'; ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,.14)'; ctx.lineWidth = 1; ctx.stroke();
+  const s = SUBS.find(q => T >= q[0] && T < q[1]);
+  if (!s) return;
+  ctx.save();
+  ctx.globalAlpha = Math.min(prog(T, s[0], s[0] + .2), 1 - prog(T, s[1] - .15, s[1]));
+  if (s[3]) { text(s[2], 640, 594, 34, '#fff'); text(s[3], 640, 638, 34, '#fff'); }
+  else text(s[2], 640, 616, 34, '#fff');          // 1行のセリフは枠の中央に置く
+  ctx.restore();
+}
+
+function footer(T) {
+  text('伊藤忠テクノソリューションズ × 豆蔵', 640, 678, 15, 'rgba(255,255,255,.62)', { w: 500 });
+}
+
+/* ==================================================================
+   第4章 共通部品
+   ================================================================== */
+const GREEN = '#62e6a7';
+// 支柱つきカメラ。(px,by)=支柱の接地点、(hx,hy)=カメラ本体の中心。レンズ下端の位置を返す
+function camera(px, by, hx, hy, s) {
+  ctx.save(); ctx.lineCap = 'round';
+  ctx.strokeStyle = C.edge; ctx.lineWidth = 5 * s; line(px, by, px, hy); line(px, hy, hx, hy);
+  ctx.fillStyle = C.edge; rr(px - 20 * s, by - 8 * s, 40 * s, 8 * s, 3 * s); ctx.fill();
+  ctx.fillStyle = C.body; rr(hx - 38 * s, hy - 20 * s, 76 * s, 40 * s, 8 * s); ctx.fill();
+  ctx.fillStyle = C.edge; rr(hx - 14 * s, hy + 20 * s, 28 * s, 10 * s, 3 * s); ctx.fill();
+  ctx.fillStyle = C.dark; circ(hx, hy + 34 * s, 9 * s); ctx.fill();
+  ctx.strokeStyle = C.cyan; ctx.lineWidth = 2 * s; circ(hx, hy + 34 * s, 9 * s); ctx.stroke();
+  ctx.restore();
+  return { x: hx, y: hy + 43 * s };
+}
+function cone(col, x, y, by, hw, a) {
+  if (a <= 0) return;
+  const g = ctx.createLinearGradient(0, y, 0, by);
+  g.addColorStop(0, rgba(col, .55 * a)); g.addColorStop(1, rgba(col, .1 * a));
+  ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - hw, by); ctx.lineTo(x + hw, by); ctx.closePath(); ctx.fill();
+}
+function check(x, y, r, col) {
+  ctx.save(); ctx.strokeStyle = col; ctx.lineWidth = r * .32; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.beginPath(); ctx.moveTo(x - r * .5, y); ctx.lineTo(x - r * .12, y + r * .4); ctx.lineTo(x + r * .55, y - r * .4); ctx.stroke();
+  ctx.restore();
+}
+function orbits(cx, cy, rx, ry, s, a) {
+  [[-.35, 1.3, 0], [.35, -1.1, 2]].forEach(([tilt, sp, off]) => {
+    ctx.strokeStyle = rgba(C.lilac, a); ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.ellipse(cx, cy, rx, ry, tilt, 0, Math.PI * 2); ctx.stroke();
+    const q = s * sp + off, ex = Math.cos(q) * rx, ey = Math.sin(q) * ry;
+    ctx.fillStyle = C.cyan; circ(cx + ex * Math.cos(tilt) - ey * Math.sin(tilt), cy + ex * Math.sin(tilt) + ey * Math.cos(tilt), Math.max(3, rx * .05)); ctx.fill();
+  });
+}
+function pill(x, y, w, h, str, px, o = {}) {
+  rr(x, y, w, h, h / 2);
+  if (o.fill) { ctx.fillStyle = o.fill; ctx.fill(); }
+  if (o.stroke) { ctx.strokeStyle = o.stroke; ctx.lineWidth = o.lw || 1.5; ctx.stroke(); }
+  text(str, x + w / 2, y + h / 2 + px * .36, px, o.col || '#fff', { w: o.w || 700 });
+}
+
+/* ---------- 4つの領域のアイコン。(x,y)=中心、k=倍率（1で約64px角） ---------- */
+function icoCosme(x, y, k) {                 // 化粧品：口紅とコンパクト
+  ctx.save(); ctx.lineJoin = 'round';
+  ctx.fillStyle = C.red; ctx.beginPath(); ctx.moveTo(x - 24 * k, y - 8 * k); ctx.lineTo(x - 24 * k, y - 24 * k); ctx.lineTo(x - 10 * k, y - 32 * k); ctx.lineTo(x - 10 * k, y - 8 * k); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#c9d6ea'; ctx.fillRect(x - 26 * k, y - 8 * k, 18 * k, 10 * k);
+  ctx.fillStyle = '#26324d'; rr(x - 29 * k, y + 2 * k, 24 * k, 28 * k, 3 * k); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,.8)'; ctx.lineWidth = 1.6 * k; rr(x - 29 * k, y + 2 * k, 24 * k, 28 * k, 3 * k); ctx.stroke();
+  ctx.fillStyle = '#ffd0c2'; rr(x + 2 * k, y + 8 * k, 28 * k, 22 * k, 5 * k); ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = C.body; rr(x, y + 2 * k, 32 * k, 9 * k, 3 * k); ctx.fill();
+  ctx.restore();
+}
+function icoFood(x, y, k) {                  // 食品・飲料：グラスとストロー
+  ctx.save(); ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  const glass = () => { ctx.beginPath(); ctx.moveTo(x - 18 * k, y - 20 * k); ctx.lineTo(x + 18 * k, y - 20 * k); ctx.lineTo(x + 12 * k, y + 30 * k); ctx.lineTo(x - 12 * k, y + 30 * k); ctx.closePath(); };
+  ctx.save(); glass(); ctx.clip(); ctx.fillStyle = '#ffb347'; ctx.fillRect(x - 20 * k, y - 4 * k, 40 * k, 36 * k); ctx.restore();
+  ctx.strokeStyle = '#fff'; ctx.lineWidth = 3 * k; line(x + 4 * k, y + 18 * k, x + 18 * k, y - 34 * k);
+  glass(); ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = 2 * k; ctx.stroke();
+  ctx.fillStyle = '#ffe9a8'; circ(x - 4 * k, y + 8 * k, 3 * k); ctx.fill(); circ(x + 4 * k, y + 18 * k, 2.4 * k); ctx.fill();
+  ctx.restore();
+}
+function icoLab(x, y, k) {                   // 創薬・分析ラボ：試験管
+  ctx.save();
+  ['#5fd0ff', C.lilac, GREEN].forEach((col, i) => {
+    const tx = x + (i - 1) * 20 * k;
+    ctx.fillStyle = col; rr(tx - 6 * k, y - 2 * k, 12 * k, 30 * k, 6 * k); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = 1.8 * k; rr(tx - 7 * k, y - 28 * k, 14 * k, 57 * k, 7 * k); ctx.stroke();
+  });
+  ctx.fillStyle = C.edge; rr(x - 34 * k, y + 6 * k, 68 * k, 6 * k, 3 * k); ctx.fill();
+  ctx.restore();
+}
+function icoPaint(x, y, k, col = '#19c9a0') { // 塗料・樹脂：塗料缶
+  ctx.save();
+  ctx.strokeStyle = C.edge; ctx.lineWidth = 2.5 * k; ctx.beginPath(); ctx.arc(x, y - 12 * k, 24 * k, Math.PI * 1.08, Math.PI * 1.92); ctx.stroke();
+  ctx.fillStyle = C.body; rr(x - 24 * k, y - 12 * k, 48 * k, 42 * k, 4 * k); ctx.fill();
+  ctx.fillStyle = col; ctx.fillRect(x - 24 * k, y + 2 * k, 48 * k, 14 * k);
+  ctx.beginPath(); ctx.ellipse(x, y - 12 * k, 24 * k, 7 * k, 0, 0, Math.PI * 2); ctx.fillStyle = col; ctx.fill();
+  ctx.strokeStyle = C.edge; ctx.lineWidth = 2 * k; ctx.stroke();
+  ctx.fillStyle = col; rr(x + 12 * k, y - 12 * k, 7 * k, 20 * k, 3.5 * k); ctx.fill();
+  ctx.restore();
+}
+
+// 第4章の間ずっと出す「展開イメージ」のラベルと注記（実績と誤解されないように）
+function ch4Note(T) {
+  const a = win(T, 140.3, 174.6, .4);
+  if (a <= 0) return;
+  ctx.save();
+  ctx.globalAlpha = a;
+  pill(64, 104, 138, 34, '展開イメージ', 18, { fill: C.yellow, col: C.dark });
+  const str = '※ 対象材料に応じた機器・スキル・評価方法の開発が必要です';
+  ctx.font = font(17, 700);
+  const w = ctx.measureText(str).width + 44;
+  pill(640 - w / 2, 517, w, 30, str, 17, { fill: 'rgba(6,20,46,.85)', stroke: rgba(C.yellow, .6), col: '#fff3c4', lw: 1.2 });
+  ctx.restore();
+}
+
+/* ==================================================================
+   4-1 (02:20–02:28) 「配合・調合」は、多くの研究・製造現場の仕事
+   ================================================================== */
+function s41(s) {
+  const by = 470;
+  ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 2; line(104, by, 1176, by);
+
+  // 研究者が材料を少しずつ混ぜる
+  const u = frac(s * .55), m = prog(s, .6, 6);
+  ctx.strokeStyle = '#b9c8e0'; ctx.lineWidth = 20; ctx.lineCap = 'round'; line(252, 404, 322, 352);
+  person(220, by, 1.5, '#cfe0ff');
+  pipette(330, 296, 66, 1, C.red, 1 - u);
+  [C.red, C.yellow, C.ink].forEach((c, i) => bottle(436 + i * 38, by, 28, 42, c));
+  cup(330, by, 92, 84, mix('#cfe0ff', mix(C.red, C.purple, .5), m), .4 + .2 * m, { la: .92, lw: 2.5, wave: 1.2, ph: s * 6 });
+  if (u > .15 && u < .9) { ctx.fillStyle = C.red; circ(330, lerp(364, 470 - 84 * (.4 + .2 * m), prog(u, .15, .9)), 4); ctx.fill(); }
+
+  // 問い
+  [['どの材料を？', 104, .7], ['どれだけ？', 262, 1.5]].forEach(([str, x, t0]) => {
+    const p = prog(s, t0, t0 + .35);
+    ctx.font = font(20, 700);
+    const w = ctx.measureText(str).width + 34;
+    A(p, () => P(x + w / 2, 216, back(p), () => pill(x, 198, w, 38, str, 20, { fill: '#ffffff', col: '#0a1d44' })));
+  });
+  const pk = prog(s, 4.6, 5.0);
+  A(pk, () => P(232, 266, back(pk), () => pill(104, 248, 256, 38, '熟練者の経験が頼り', 19, { fill: 'rgba(6,20,46,.92)', stroke: C.yellow, lw: 2, col: C.yellow })));
+
+  // 試作品を並べて見比べる
+  const SX = [640, 752, 864, 976, 1088];
+  const cols = ['#ff7fa3', '#e56fb3', '#c763d0', '#a259ff', '#8a6bff'];
+  const cmp = s > 4.4 ? Math.floor((s - 4.4) / .7) % 5 : -1;
+  SX.forEach((x, i) => {
+    const p = prog(s, 1.0 + i * .7, 1.4 + i * .7);
+    A(p, () => P(x, by - 26, back(p), () => {
+      if (cmp === i) {
+        ctx.save(); glow(rgba(C.yellow, .9), 18);
+        ctx.strokeStyle = C.yellow; ctx.lineWidth = 3; rr(x - 46, by - 74, 92, 82, 14); ctx.stroke();
+        ctx.restore();
+      }
+      cup(x, by, 70, 52, cols[i], .62, { la: .95, lw: 2 });
+      ctx.fillStyle = 'rgba(6,20,46,.9)'; circ(x, by - 92, 14); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,.6)'; ctx.lineWidth = 1.5; circ(x, by - 92, 14); ctx.stroke();
+      text(String(i + 1), x, by - 86, 16, '#fff');
+    }));
+  });
+  A(prog(s, 4.2, 4.6), () => {
+    text('試作を並べて、見比べる', 864, 316, 20, '#fff');
+    if (cmp >= 0) text('？', SX[cmp], by - 116, 30, C.yellow, { w: 900 });
+  });
+}
+
+/* ==================================================================
+   4-2 / 4-3 共通：言葉で指示 → ロボットが少量ずつ試作
+   ================================================================== */
+function trial(s, T, o) {
+  const by = 470, VX = [720, 800, 880], SX = [960, 996], home = { x: 1000, y: 384 };
+  ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 2; line(104, by, 1176, by);
+
+  person(190, by, 1.4, '#cfe0ff');
+  o.bubbles.forEach(([a, b, str]) => {
+    const p = prog(s, a, a + .35) * (1 - prog(s, b - .25, b));
+    A(p, () => P(229, 242, back(prog(s, a, a + .35)), () => bubble(104, 216, 250, 52, str, 22, { tx: 170, px: 176 })));
+  });
+  const heard = o.bubbles.some(([a]) => s > a + .2 && s < a + 1.2);
+  chev(385, 318, 20, T, C.cyan);
+  orbits(470, 318, 66, 24, s, .45);
+  aiBadge(470, 318, 36, heard ? frac(s * 1.3) : 0);
+  chev(560, 318, 20, T, C.lilac);
+  o.icon(640, 430, 1.3);
+
+  // ロボットの2回の試作
+  const k = s < (o.cyc[0][1] + o.cyc[1][0]) / 2 ? 0 : 1, t = o.cyc[k];
+  const cc = cyc(prog(s, t[0], t[1]), SX[k], 446, VX[k + 1], 438, 400);
+  const g = Math.min(eio(prog(s, t[0] - .5, t[0])), 1 - eio(prog(s, t[1], t[1] + .5)));
+  const tip = { x: lerp(home.x, cc.x, g), y: lerp(home.y, cc.y, g) };
+  const m1 = k === 0 ? cc.disp : 1, m2 = k === 1 ? cc.disp : 0;
+  arm(1110, by, tip.x, tip.y, { s: 1.3, liq: o.src[k], fill: cc.fill });
+  bottle(SX[0], by, 28, 44, o.src[0]); bottle(SX[1], by, 28, 44, o.src[1]);
+  o.vessel(VX[0], by, o.cols[0], .62);
+  o.vessel(VX[1], by, o.cols[1], .62 * m1);
+  o.vessel(VX[2], by, o.cols[2], .62 * m2);
+  if (cc.disp > 0 && cc.disp < 1) { ctx.strokeStyle = o.src[k]; ctx.lineWidth = 2.5; ctx.lineCap = 'round'; line(tip.x, tip.y, tip.x, by - 8); }
+  ['A', 'B', 'C'].forEach((n, i) => text(n, VX[i], by + 22, 15, 'rgba(255,255,255,.7)'));
+  o.extra({ m1, m2, VX, by, d1: prog(s, o.cyc[0][1] + .1, o.cyc[0][1] + .5), d2: prog(s, o.cyc[1][1] + .1, o.cyc[1][1] + .5) });
+}
+function tag(x, y, str, p, col) {
+  A(p, () => P(x, y, back(p), () => pill(x - 36, y - 14, 72, 28, str, 15, { fill: 'rgba(6,20,46,.94)', stroke: col, lw: 2, col })));
+}
+
+/* 4-2 (02:28–02:36) 化粧品：色や香りの試作 */
+function s42(s, T) {
+  // 香りの強さ＝立ちのぼる線の本数
+  const scent = (x, n, a) => {
+    ctx.strokeStyle = rgba('#ffd6f0', .9 * a); ctx.lineWidth = 2.2; ctx.lineCap = 'round';
+    for (let i = 0; i < n; i++) {
+      const ox = x + (i - (n - 1) / 2) * 15;
+      ctx.beginPath();
+      for (let j = 0; j <= 10; j++) ctx.lineTo(ox + Math.sin(j * .9 + s * 3 + i) * 3.5, 420 - j * 2.6);
+      ctx.stroke();
+    }
+  };
+  trial(s, T, {
+    bubbles: [[.4, 3.9, '「赤みを抑えて」'], [4.1, 8.2, '「香りを控えめに」']],
+    cyc: [[1.2, 3.6], [4.9, 7.3]],
+    icon: icoCosme,
+    src: ['#ffe3d6', '#ffe3d6'],
+    cols: ['#ff6f91', '#f2a999', '#f2a999'],
+    vessel: (x, by, col, lv) => cup(x, by, 60, 44, col, lv, { la: .95, lw: 2 }),
+    extra: ({ m1, m2, VX, d1, d2 }) => {
+      scent(VX[0], 3, 1); scent(VX[1], 3, m1 >= 1 ? d1 : 0); scent(VX[2], 1, m2 >= 1 ? d2 : 0);
+      tag(VX[1], 366, '赤み ↓', d1, '#ff9fb5'); tag(VX[2], 366, '香り ↓', d2, '#ffd6f0');
+    }
+  });
+}
+
+/* 4-3 (02:36–02:44) 食品・飲料：味や香りの試作 */
+function s43(s, T) {
+  const step = s < 1.0 ? -1 : s < 3.5 ? 0 : s < 4.6 ? 1 : s < 5.0 ? 2 : s < 7.25 ? 0 : 1;
+  // 甘さ＝角砂糖の数
+  const sugar = (x, n, a) => A(a, () => {
+    for (let i = 0; i < n; i++) {
+      const ox = x + (i - (n - 1) / 2) * 13;
+      ctx.fillStyle = '#fff'; rr(ox - 5, 386, 10, 10, 2); ctx.fill();
+      ctx.strokeStyle = 'rgba(10,22,48,.4)'; ctx.lineWidth = 1; ctx.stroke();
+    }
+  });
+  const cols = ['#ffb347', '#ffc875', '#ffd9a0'];
+  trial(s, T, {
+    bubbles: [[.4, 8.2, '「甘さを控えめに」']],
+    cyc: [[1.1, 3.4], [5.0, 7.2]],
+    icon: icoFood,
+    src: ['#fff1d6', '#fff1d6'],
+    cols,
+    vessel: (x, by, col, lv) => cup(x, by, 46, 62, col, lv, { la: .95, lw: 2 }),
+    extra: ({ m1, m2, VX, by, d1, d2 }) => {
+      sugar(VX[0], 3, 1); sugar(VX[1], 2, m1 >= 1 ? d1 : 0); sugar(VX[2], 1, m2 >= 1 ? d2 : 0);
+      // 人が味や香りを評価する
+      const ev = (x, mk, p) => A(p, () => P(x, 352, back(p), () => {
+        ctx.fillStyle = 'rgba(6,20,46,.94)'; circ(x, 352, 18); ctx.fill();
+        ctx.strokeStyle = C.yellow; ctx.lineWidth = 2; circ(x, 352, 18); ctx.stroke();
+        text(mk, x, 360, 22, C.yellow, { w: 900 });
+      }));
+      ev(VX[1], '△', prog(s, 3.8, 4.2)); ev(VX[2], '◎', prog(s, 7.45, 7.8));
+      const tp = Math.max(win(s, 3.5, 4.8, .25), prog(s, 7.3, 7.55));
+      A(tp, () => P(296, by - 24, back(Math.min(1, tp)), () => {
+        cup(296, by, 36, 48, s < 6 ? cols[1] : cols[2], .6, { la: .95, lw: 2 });
+        ctx.lineWidth = 2.5; ctx.lineCap = 'round';
+        for (let i = 0; i < 2; i++) { const ph = frac(s * 1.2 - i * .5); ctx.strokeStyle = rgba(C.yellow, 1 - ph); ctx.beginPath(); ctx.arc(250, 356, 30 + ph * 16, -.2, .7); ctx.stroke(); }
+      }));
+    }
+  });
+  // 試作 → 人が評価 → 次の配合へ
+  ['試作', '人が評価', '次の配合へ'].forEach((n, i) => {
+    const x = 620 + i * 150, on = step === i, p = prog(s, .3 + i * .12, .7 + i * .12);
+    A(p, () => {
+      ctx.save();
+      if (on) glow(rgba(C.yellow, .9), 16);
+      pill(x, 178, 130, 34, n, 17, { fill: on ? C.yellow : 'rgba(16,36,80,.92)', stroke: on ? '#fff' : 'rgba(255,255,255,.35)', col: on ? C.dark : '#fff' });
+      ctx.restore();
+      if (i < 2) { ctx.fillStyle = 'rgba(255,255,255,.6)'; ctx.beginPath(); ctx.moveTo(x + 136, 188); ctx.lineTo(x + 145, 195); ctx.lineTo(x + 136, 202); ctx.closePath(); ctx.fill(); }
+    });
+  });
+  A(prog(s, .7, 1.1), () => {
+    const rot = step === 2 ? s * 6 : 0;
+    ctx.strokeStyle = C.yellow; ctx.lineWidth = 2.5; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.arc(1074, 195, 11, rot, rot + 5); ctx.stroke();
+    ctx.fillStyle = C.yellow; circ(1074 + Math.cos(rot + 5) * 11, 195 + Math.sin(rot + 5) * 11, 4); ctx.fill();
+  });
+}
+
+/* ==================================================================
+   4-4 (02:44–02:55) 創薬・分析ラボ／工業製品の調色 → 4領域が集まる
+   ================================================================== */
+function s44(s) {
+  /* 前半：左右の2場面 */
+  A(1 - prog(s, 5.5, 6.0), () => {
+    // 左：創薬・分析ラボでの試薬の分注
+    panel(84, 170, 520, 340, '創薬・分析ラボ', C.cyan, win(s, .3, 3));
+    pill(486, 182, 104, 32, '試薬の分注', 15, { stroke: 'rgba(255,255,255,.6)' });
+    rr(128, 286, 300, 176, 12); ctx.fillStyle = '#0d1c3d'; ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,.6)'; ctx.lineWidth = 2; ctx.stroke();
+    const well = i => ({ x: 152 + (i % 8) * 36, y: 318 + Math.floor(i / 8) * 38 });
+    const f = clamp((s - .8) * 6.5, 0, 31.999), n = Math.floor(f);
+    for (let i = 0; i < 32; i++) {
+      const w = well(i);
+      if (i < n || (i === n && f - n > .6)) { ctx.fillStyle = (i % 8) < 4 ? '#5fd0ff' : C.lilac; circ(w.x, w.y, 11); ctx.fill(); }
+      ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 1.5; circ(w.x, w.y, 12); ctx.stroke();
+    }
+    const w0 = well(n), w1 = well(Math.min(31, n + 1)), e = eio(prog(f - n, .6, 1));
+    const px = lerp(w0.x, w1.x, e), py = lerp(w0.y, w1.y, e) - 3 - 10 * Math.sin(Math.PI * e);
+    ctx.save();
+    rr(84, 170, 520, 340, 18); ctx.clip();
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = C.edge; ctx.lineWidth = 23; line(px, py - 70, px + 80, 120);
+    ctx.strokeStyle = C.body; ctx.lineWidth = 20; line(px, py - 70, px + 80, 120);
+    pipette(px, py - 70, 70, 1, (n % 8) < 4 ? '#5fd0ff' : C.lilac, 1 - .7 * prog(f - n, 0, .6));
+    ctx.fillStyle = C.body; circ(px, py - 70, 11); ctx.fill(); ctx.fillStyle = C.sky; circ(px, py - 70, 5); ctx.fill();
+    ctx.restore();
+    ['#5fd0ff', C.lilac, GREEN].forEach((col, i) => {
+      const tx = 484 + i * 36;
+      ctx.fillStyle = col; rr(tx - 8, 404, 16, 56, 8); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,.8)'; ctx.lineWidth = 1.8; rr(tx - 9, 370, 18, 92, 9); ctx.stroke();
+    });
+    ctx.fillStyle = C.edge; rr(466, 424, 108, 8, 4); ctx.fill();
+
+    // 右：塗料・樹脂の調色
+    panel(676, 170, 520, 340, '塗料・樹脂', C.yellow, win(s, 3, 5.6));
+    pill(1118, 182, 64, 32, '調色', 15, { stroke: 'rgba(255,255,255,.6)' });
+    const by = 462, m = eio(prog(s, 1.0, 4.6)), target = '#19c9a0', cur = mix(C.ink, target, m);
+    ctx.strokeStyle = 'rgba(255,255,255,.45)'; ctx.lineWidth = 2; line(696, by, 1176, by);
+    ctx.strokeStyle = C.edge; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(800, 342, 70, Math.PI * 1.06, Math.PI * 1.94); ctx.stroke();
+    ctx.fillStyle = C.body; rr(730, 342, 140, 120, 8); ctx.fill();
+    ctx.fillStyle = cur; ctx.fillRect(730, 384, 140, 40);
+    ctx.beginPath(); ctx.ellipse(800, 342, 70, 16, 0, 0, Math.PI * 2); ctx.fillStyle = cur; ctx.fill();
+    ctx.strokeStyle = C.edge; ctx.lineWidth = 3; ctx.stroke();
+    ctx.lineWidth = 3; ctx.lineCap = 'round';
+    for (let i = 0; i < 2; i++) { const a0 = s * 4 + i * 3; ctx.strokeStyle = rgba('#ffffff', .45 * (1 - m)); ctx.beginPath(); ctx.ellipse(800, 342, 30 + i * 18, 6 + i * 4, 0, a0, a0 + 1.6); ctx.stroke(); }
+    const du = frac(s * 1.4);
+    ctx.save();
+    rr(676, 170, 520, 340, 18); ctx.clip();
+    ctx.strokeStyle = C.edge; ctx.lineWidth = 23; line(800, 248, 880, 120);
+    ctx.strokeStyle = C.body; ctx.lineWidth = 20; line(800, 248, 880, 120);
+    pipette(800, 248, 70, 1, C.yellow, m < 1 ? 1 - du * .5 : 0);
+    ctx.fillStyle = C.body; circ(800, 248, 11); ctx.fill(); ctx.fillStyle = C.sky; circ(800, 248, 5); ctx.fill();
+    ctx.restore();
+    if (m < 1 && s > .8) { ctx.fillStyle = C.yellow; circ(800, lerp(320, 338, du), 4); ctx.fill(); }
+    rr(960, 290, 88, 88, 10); ctx.fillStyle = target; ctx.fill(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+    rr(1070, 290, 88, 88, 10); ctx.fillStyle = cur; ctx.fill(); ctx.stroke();
+    text('目標の色', 1004, 404, 16, '#fff', { w: 500 });
+    text(m >= 1 ? '一致' : '調色中', 1114, 404, 16, m >= 1 ? GREEN : '#fff', { w: m >= 1 ? 700 : 500 });
+    const pm = prog(s, 4.6, 5.0);
+    A(pm, () => P(1150, 296, back(pm), () => { ctx.fillStyle = GREEN; circ(1150, 296, 14); ctx.fill(); check(1150, 296, 14, C.dark); }));
+  });
+
+  /* 後半：4つの領域が、中央の調合AIロボットに集まる */
+  const doms = [['化粧品', icoCosme, 300, 252, -1], ['食品・飲料', icoFood, 300, 418, -1],
+                ['創薬・分析ラボ', icoLab, 980, 252, 1], ['塗料・樹脂', icoPaint, 980, 418, 1]];
+  const pc = prog(s, 6.0, 6.6);
+  A(pc, () => {
+    doms.forEach(([n, , fx, fy, dir], i) => {             // つなぐ線と「機器・スキル」
+      const g = eo(prog(s, 6.2 + i * .25, 7.1 + i * .25)), x0 = fx - dir * 100, x1 = 640 + dir * 108, y1 = lerp(fy, 335, .7);
+      A(g, () => {
+        ctx.setLineDash([4, 6]); ctx.strokeStyle = rgba(C.cyan, .8); ctx.lineWidth = 2; line(x0, fy, x1, y1); ctx.setLineDash([]);
+        const q = frac(s * .6 + i * .25); ctx.fillStyle = C.cyan; circ(lerp(x0, x1, q), lerp(fy, y1, q), 4); ctx.fill();
+      });
+      const pt = prog(s, 8.0 + i * .35, 8.35 + i * .35);
+      A(pt, () => P((x0 + x1) / 2, (fy + y1) / 2, back(pt), () =>
+        pill((x0 + x1) / 2 - 56, (fy + y1) / 2 - 14, 112, 28, '機器・スキル', 15, { fill: 'rgba(6,20,46,.95)', stroke: C.yellow, lw: 1.8, col: C.yellow })));
+    });
+    // 中央：調合AIロボット
+    P(640, 335, back(pc), () => {
+      ctx.save(); glow(rgba(C.cyan, .7), 26);
+      ctx.fillStyle = 'rgba(18,40,86,.96)'; circ(640, 335, 106); ctx.fill();
+      ctx.restore();
+      ctx.strokeStyle = C.cyan; ctx.lineWidth = 2.5; circ(640, 335, 106); ctx.stroke();
+      const c = cyc(frac(s / 3.2), 582, 372, 622, 368, 346);
+      ctx.strokeStyle = 'rgba(255,255,255,.4)'; ctx.lineWidth = 2; line(560, 392, 720, 392);
+      arm(684, 392, c.x, c.y, { s: .68, liq: C.red, fill: c.fill });
+      bottle(582, 392, 18, 26, C.red);
+      cup(622, 392, 36, 32, C.purple, .5, { la: .95, lw: 2 });
+      aiBadge(596, 284, 21, frac(s * .8));
+    });
+    pill(530, 452, 220, 42, '調合AIロボット', 22, { fill: C.cyan, col: C.dark });
+  });
+  doms.forEach(([n, ico, fx, fy, dir], i) => {
+    const g = eo(prog(s, 6.0 + i * .25, 6.9 + i * .25)), cx = fx + dir * 170 * (1 - g);
+    A(g, () => {
+      rr(cx - 100, fy - 62, 200, 124, 18); ctx.fillStyle = 'rgba(18,40,86,.96)'; ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,.45)'; ctx.lineWidth = 1.5; ctx.stroke();
+      ico(cx, fy - 18, 1);
+      text(n, cx, fy + 46, 19, '#fff');
+    });
+  });
+}
+
+/* ==================================================================
+   案内 (02:55–03:05) ブーススタッフへの相談の呼びかけ
+   ================================================================== */
+function sInfo(s) {
+  const by = 440;
+  ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 2; line(330, by, 950, by);
+
+  // 実機
+  const lens = camera(900, by, 862, 236, .9);
+  cone(C.cyan, lens.x, lens.y, 432, 34, .5);
+  ctx.fillStyle = C.purple; rr(832, 432, 60, 8, 2); ctx.fill();
+  const uu = s / 4.4, c = cyc(frac(uu), 520, 416, 600, 408, 372), n = Math.floor(uu);
+  arm(720, by, c.x, c.y, { s: 1.2, liq: C.red, fill: c.fill });
+  bottle(480, by, 28, 44, C.ink); bottle(520, by, 28, 44, C.red);
+  cup(600, by, 70, 60, mix(C.ink, C.purple, clamp((n + c.disp) / 2)), .5, { la: .92, lw: 2.5 });
+
+  // 来場者とスタッフ
+  person(230, by, 1.5, '#cfe0ff'); person(1050, by, 1.5, '#8fc0ff');
+  ctx.fillStyle = C.blue; ctx.fillRect(1038, by - 92, 24, 30);
+  text('来場者', 230, by + 26, 17, 'rgba(255,255,255,.85)', { w: 500 });
+  text('スタッフ', 1050, by + 26, 17, 'rgba(255,255,255,.85)', { w: 500 });
+  ctx.lineWidth = 4; ctx.lineCap = 'round';
+  for (let i = 0; i < 3; i++) {
+    const ph = frac(s * 1.1 - i * .33);
+    ctx.strokeStyle = rgba(C.cyan, (1 - ph) * prog(s, 1.5, 2));
+    ctx.beginPath(); ctx.arc(1050, 302, 38 + ph * 40, Math.PI - .5, Math.PI + .5); ctx.stroke();
+  }
+
+  // 来場者が思い浮かべる「試したい調合」
+  const pb = prog(s, .5, .9);
+  A(pb, () => P(230, 206, back(pb), () => {
+    ctx.save(); glow('rgba(0,0,0,.4)', 12);
+    rr(120, 160, 220, 92, 30); ctx.fillStyle = 'rgba(6,20,46,.95)'; ctx.fill();
+    ctx.restore();
+    rr(120, 160, 220, 92, 30); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+    ctx.fillStyle = '#fff'; circ(262, 262, 6); ctx.fill(); circ(256, 275, 3.5); ctx.fill();
+    const icons = [icoCosme, icoFood, icoLab, icoPaint], f = Math.max(0, s - 1) / 1.5, k = Math.floor(f) % 5, a = Math.min(prog(f % 1, 0, .2), 1 - prog(f % 1, .85, 1));
+    A(a, () => { if (k < 4) icons[k](230, 206, 1.1); else text('？', 230, 227, 58, C.yellow, { w: 900 }); });
+  }));
+
+  // 呼びかけ
+  const pcta = prog(s, 1.2, 1.7), pulse = .5 + .5 * Math.sin(s * 3);
+  A(pcta, () => P(640, 498, back(pcta) * (1 + .015 * pulse), () => {
+    ctx.save(); glow(rgba(C.yellow, .5 + .4 * pulse), 26);
+    rr(370, 470, 540, 56, 28); ctx.fillStyle = C.yellow; ctx.fill();
+    ctx.restore();
+    text('ブーススタッフへお声がけください', 640, 508, 28, C.dark, { w: 900 });
+  }));
+}
+
+/* ---------- 進行 ---------- */
+function scene(T, a, b, fn) {
+  if (T < a || T >= b) return;
+  ctx.save();
+  ctx.globalAlpha = Math.min(prog(T, a, a + .45), 1 - prog(T, b - .3, b));
+  fn(T - a, T);
+  ctx.restore();
+}
+
+function render(T) {
+  ctx.setTransform(K, 0, 0, K, 0, 0);
+  ctx.globalAlpha = 1; noglow(); ctx.setLineDash([]);
+  background(T);
+  scene(T, 140, 148, s41);
+  scene(T, 148, 156, s42);
+  scene(T, 156, 164, s43);
+  scene(T, 164, 175, s44);
+  scene(T, 175, 185, sInfo);
+  telop('「配合・調合」は、多くの研究・製造現場の仕事', T, 140.2, 148, 38);
+  telop('化粧品：色や香りの試作', T, 148.2, 156, 42);
+  telop('食品・飲料：味や香りの試作', T, 156.2, 164, 42);
+  telop('創薬・分析ラボ ／ 工業製品の調色', T, 164.2, 175, 42);
+  telop('あなたの現場で、試したい「調合」は？', T, 175.2, 185, 44);
+  ch4Note(T);
+  header(T);
+  subtitle(T);
+  footer(T);
+  toast();
+}
+
+function fit() {
+  const s = Math.min(innerWidth / W, innerHeight / H) || 1;
+  const dpr = Math.min(window.devicePixelRatio || 1, 3);
+  cv.style.width = W * s + 'px'; cv.style.height = H * s + 'px';
+  cv.width = Math.max(1, Math.round(W * s * dpr)); cv.height = Math.max(1, Math.round(H * s * dpr));
+  K = cv.width / W;
+  render(now());
+}
+
+/* ---------- 再生の制御 ---------- */
+const Q = location.search + location.hash;
+// テンポ：各シーンの表示時間の倍率。1 = シナリオどおりの長さ、2 = 2倍ゆっくり（読む時間が延びる）。
+// ここの数字を書き換えるか、URL の末尾に #slow=1.5 のように付ける。再生中は ↑（ゆっくり）↓（速く）で 0.05 ずつ変わる。
+let SLOW = 2;
+{ const m = /[?#&]slow=([\d.]+)/.exec(Q); if (m && +m[1] > 0) SLOW = clamp(+m[1], .5, 3); }
+// index.html から連続再生されるときの指定。once = ループせず、終わったら親に知らせる / hold = 合図が来るまで頭で待つ
+const EMBED = window.parent !== window, ONCE = /[?#&]once\b/.test(Q);
+const BGP = ONCE ? 185 : LOOP;          // 背景のゆらぎの周期（連続再生では動画全体で1周）
+let paused = /[?#&]hold\b/.test(Q), held = T0, base = performance.now(), ended = false, toastAt = -1e9;
+const tell = msg => { if (EMBED) window.parent.postMessage(Object.assign({ pai: 1 }, msg), '*'); };
+function readT() {
+  const m = /[?#&]t=([\d.]+)/.exec(location.search + location.hash);
+  if (m) { paused = true; held = clamp(parseFloat(m[1]) || T0, T0, T1 - .001); }
+}
+readT();
+addEventListener('hashchange', readT);
+window.seekTo = t => { paused = true; held = clamp(+t || T0, T0, T1 - .001); fit(); };   // 確認用：指定秒で静止
+// 画面に出す時刻（動画全体の時刻・秒）。実時間を SLOW で割って進める
+function now() {
+  if (paused) return held;
+  const el = (performance.now() - base) / 1000 / SLOW;
+  if (!ONCE) return T0 + el % LOOP;
+  if (el < LOOP) return T0 + el;
+  if (!ended) { ended = true; tell({ ev: 'ended' }); }
+  return T1 - .001;
+}
+function seek(t) {
+  t = ONCE ? clamp(t, T0, T1 - .001) : T0 + (((t - T0) % LOOP) + LOOP) % LOOP;
+  held = t; base = performance.now() - (t - T0) * 1000 * SLOW; ended = false;
+}
+function play() { if (paused) { seek(held); paused = false; } }
+function pause() { if (!paused) { held = now(); paused = true; } }
+function setSlow(v) { const t = now(); SLOW = clamp(Math.round(v * 100) / 100, .5, 3); seek(t); toastAt = performance.now(); }
+function toast() {
+  if (EMBED || performance.now() - toastAt > 1800) return;
+  const str = 'テンポ：表示時間 ×' + SLOW.toFixed(2);
+  ctx.font = font(16, 700);
+  const w = ctx.measureText(str).width + 28;
+  rr(64, 658, w, 28, 14); ctx.fillStyle = 'rgba(6,20,46,.92)'; ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,.4)'; ctx.lineWidth = 1; ctx.stroke();
+  text(str, 78, 678, 16, '#fff', { align: 'left' });
+}
+addEventListener('keydown', e => {
+  if (e.code === 'Space') { if (paused) play(); else pause(); e.preventDefault(); }
+  else if (e.code === 'ArrowRight') seek(now() + 1);
+  else if (e.code === 'ArrowLeft') seek(now() - 1);
+  else if (e.code === 'ArrowUp') { setSlow(SLOW + .05); e.preventDefault(); }
+  else if (e.code === 'ArrowDown') { setSlow(SLOW - .05); e.preventDefault(); }
+  else if (e.code === 'Home') seek(T0);
+  else if (/^(Digit|Numpad)\d$/.test(e.code) && CH_LABEL[+e.code.slice(-1)]) seek(CH_LABEL[+e.code.slice(-1)][0]);
+});
+// index.html（親）からの合図
+addEventListener('message', e => {
+  const d = e.data;
+  if (!EMBED || e.source !== window.parent || !d || d.pai !== 1) return;
+  if (d.cmd === 'restart') { seek(T0); paused = false; }
+  else if (d.cmd === 'toggle') { if (paused) play(); else pause(); }
+  else if (d.cmd === 'slow') setSlow(d.v);
+  else if (d.cmd === 'seek') seek(now() + d.d);
+});
+addEventListener('resize', fit);
+let vw = 0, vh = 0;
+function frame() {
+  if (innerWidth !== vw || innerHeight !== vh) { vw = innerWidth; vh = innerHeight; fit(); }   // resize イベントが来ない環境への保険
+  else render(now());
+  requestAnimationFrame(frame);
+}
+fit();
+requestAnimationFrame(frame);
+tell({ ev: 'ready' });
+if (ONCE) setInterval(now, 200);   // 画面の描画が止まっている間も、章の終わりを検出して親に知らせる
+})();
+</script>
+</body>
+</html>
