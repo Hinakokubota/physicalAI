@@ -64,9 +64,9 @@ def main():
                     print(page.evaluate('({time:PhysicalAI.getState().clock.time,scene:PhysicalAI.getState().scene,failed:PhysicalAI.getState().failed,pending:PhysicalAI.getState().playPending,paused:document.querySelector("audio").paused,ready:document.querySelector("audio").readyState,source:document.querySelector("audio").currentSrc,status:document.querySelector("#pai-status").textContent})'), flush=True)
                     raise
                 page.wait_for_timeout(100)
-                state = page.evaluate('({t:PhysicalAI.getState().clock.time,a:document.querySelector("audio").currentTime,src:document.querySelector("audio").dataset.scenePath,slow:PhysicalAI.getState().clock.slow})')
+                state = page.evaluate('(()=>{let s=PhysicalAI.getState(),t=s.clock.time,scene=PhysicalAINarrationData.scenes.find(s=>t>=s.start&&t<s.end);return {t,a:s.audio.currentTime,expected:PhysicalAI.renderToWall(t)-scene.wallStart,src:s.audio.dataset.scenePath,slow:s.clock.slow};})()')
                 assert state['src'] == s['planned_audio_path'], state
-                assert abs(state['a']-(state['t']-s['timeline_start_seconds'])*2) < .25, state
+                assert abs(state['a']-state['expected']) < .25, state
                 assert page.locator('audio').count() == 1
                 frame = page.locator('iframe.on').element_handle().content_frame()
                 frame.wait_for_function('typeof window.seekTo === "function"')

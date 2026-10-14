@@ -6,6 +6,25 @@
   const format = t => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}`;
   let owner = null;
 
+  function interpolate(value, points, inverse = false) {
+    const x = inverse ? 1 : 0, y = inverse ? 0 : 1;
+    for (let i=1; i<points.length; i++) {
+      if (value <= points[i][x]) {
+        const a=points[i-1], b=points[i];
+        return a[y]+(b[y]-a[y])*clamp((value-a[x])/(b[x]-a[x]),0,1);
+      }
+    }
+    return points.at(-1)[y];
+  }
+  function renderToWall(t) {
+    const scene = data.scenes.find(s => t >= s.start && t < s.end) || data.scenes.at(-1);
+    return scene.wallStart + interpolate(t, scene.anchors);
+  }
+  function wallToRender(t) {
+    const scene = data.scenes.find(s => t >= s.wallStart && t < s.wallStart+s.wallDuration) || data.scenes.at(-1);
+    return interpolate(t-scene.wallStart, scene.anchors, true);
+  }
+
   class Timeline {
     constructor(start, end, slow) {
       this.start = start; this.end = end; this.slow = slow;
@@ -14,8 +33,9 @@
     }
     get time() {
       if (!this.playing) return this.held;
-      const t = this.held + (performance.now() - this.epoch) / 1000 / this.slow;
-      return this.start + ((t - this.start) % (this.end - this.start));
+      const start = renderToWall(this.start), end = renderToWall(this.end);
+      const elapsed = (performance.now()-this.epoch)/1000 * data.audioSlow/this.slow;
+      return wallToRender(start+((renderToWall(this.held)-start+elapsed) % (end-start)));
     }
     seek(t) {
       this.held = clamp(t, this.start, this.end - .001);
@@ -121,7 +141,7 @@
       }
       if (state.loading || state.failed === scene.id) return;
       audio.playbackRate = data.audioSlow / clock.slow;
-      const expected = (t - scene.start) * data.audioSlow;
+      const expected = renderToWall(t)-scene.wallStart;
       if (audio.readyState >= 1) {
         const target = Math.min(expected, Math.max(0, audio.duration - .02));
         if (force || (!audio.seeking && Math.abs(audio.currentTime - target) > .18)) audio.currentTime = target;
@@ -175,8 +195,8 @@
       get('pai-audio').textContent = state.enabled ? '音声OFF' : '音声ON';
       get('pai-audio').setAttribute('aria-pressed', String(state.enabled));
       get('pai-seek').value = clock.time;
-      get('pai-time').textContent = `${format(clock.time)} / ${format(clock.end)}`;
-      get('pai-time').title = '基準タイムラインの時刻';
+      get('pai-time').textContent = `${format(renderToWall(clock.time)-renderToWall(clock.start))} / ${format(renderToWall(clock.end)-renderToWall(clock.start))}`;
+      get('pai-time').title = '通常テンポの再生時刻';
       get('pai-slow').textContent = `表示×${clock.slow.toFixed(2)}`;
       if (playlist) get('pai-chapter').value = playlist.findIndex(c => clock.time >= c.start && clock.time < c.end);
     }
@@ -254,5 +274,5 @@
     return {get time() { return clock.time; }, seek: t => {clock.setPlaying(false); state.seek(t);}, clock};
   }
 
-  window.PhysicalAI = {startPlaylist, createChapter, getState: () => owner};
+  window.PhysicalAI = {startPlaylist, createChapter, renderToWall, wallToRender, getState: () => owner};
 })();

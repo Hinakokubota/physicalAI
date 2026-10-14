@@ -1,0 +1,12 @@
+{
+  "duration_seconds": 234.333333,
+  "bytes": 21767435,
+  "sha256": "124842761eb0c97aed981eb6b9be5f16ca7b5b0f3145389e974fa582c3b36a39",
+  "width": 1280,
+  "height": 720,
+  "fps": 30,
+  "video_codec": "h264",
+  "audio_codec": "aac",
+  "generation": "Deterministic Canvas rendering with local continuous edge-tts narration",
+  "external_requests_during_export": 0
+}

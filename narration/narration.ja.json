@@ -1,6 +1,6 @@
 {
-  "schema_version": 1,
-  "status": "approved_script_audio_generated",
+  "schema_version": 2,
+  "status": "smoother_narration_generated",
   "language": "ja-JP",
   "source_commit": "392de1421c12574342e599e2b1d7c9dcbd16073e",
   "scope": "動画20シーン。静的な physical-ai-flyer.html はナレーション対象外。",
@@ -8,13 +8,13 @@
     "unit": "seconds",
     "duration_seconds": 185,
     "default_slow": 2,
-    "default_wall_duration_seconds": 370,
-    "time_mapping": "wall_elapsed_seconds = (timeline_seconds - segment_start_seconds) * slow"
+    "default_wall_duration_seconds": 234.330498,
+    "time_mapping": "Piecewise linear mapping from original scene/subtitle times to measured speech word boundaries; assets/narration-data.js contains anchors."
   },
   "estimation": {
     "method": "手動の読み仮名からモーラ数を計算。7モーラ/秒 + 読点0.25秒 + 句点0.5秒。範囲は6〜8モーラ/秒。",
     "is_measured_audio_duration": false,
-    "note": "読み方・抑揚・文間の間によって変動する。生成後にMP3の実尺とシーン内の字幕・動作タイミングを確認する。"
+    "note": "Original planning estimates before continuous narration. Current measured durations and speech-aligned scene timing are in default_wall_* and audio/manifest.json."
   },
   "scenes": [
     {
@@ -26,8 +26,8 @@
       "timeline_end_seconds": 5,
       "timeline_duration_seconds": 5,
       "default_wall_start_seconds": 0,
-      "default_wall_end_seconds": 10,
-      "default_wall_duration_seconds": 10,
+      "default_wall_end_seconds": 6.988791,
+      "default_wall_duration_seconds": 6.988791,
       "visual_description": "人が「紫色をつくって」と話しかけ、ロボットが色材を吸引・吐出して紫色に混ぜる。",
       "narration_text": "「紫色をつくって」。そう話しかけると、ロボットが色材を混ぜて、色をつくります。",
       "reading_kana_for_estimation": "「むらさきいろをつくって」。そうはなしかけると、ろぼっとがしきざいをまぜて、いろをつくります。",
@@ -37,9 +37,6 @@
         6.6,
         8.3
       ],
-      "fits_default_scene_estimate": true,
-      "fits_1x_scene_estimate": false,
-      "minimum_scene_slow_with_0_5s_margin_estimate": 1.58,
       "source_subtitle_cues": [
         {
           "timeline_start_seconds": 0.0,
@@ -53,7 +50,7 @@
         }
       ],
       "planned_audio_path": "audio/scene-01.mp3",
-      "audio_status": "generated",
+      "audio_status": "generated_continuous",
       "narration_cues": [
         {
           "timeline_start_seconds": 0,
@@ -64,8 +61,11 @@
           "text": "ロボットが色材を混ぜて、色をつくります。"
         }
       ],
-      "measured_padded_audio_seconds": 10.056,
-      "measured_speech_before_padding_seconds": 9.288
+      "measured_speech_before_padding_seconds": 8.28,
+      "measured_audio_seconds": 7.056,
+      "initial_plan_fits_default_scene_estimate": true,
+      "initial_plan_fits_1x_scene_estimate": false,
+      "initial_plan_minimum_scene_slow_with_0_5s_margin_estimate": 1.58
     },
     {
       "id": "scene-02",
@@ -75,9 +75,9 @@
       "timeline_start_seconds": 5,
       "timeline_end_seconds": 10,
       "timeline_duration_seconds": 5,
-      "default_wall_start_seconds": 10,
-      "default_wall_end_seconds": 20,
-      "default_wall_duration_seconds": 10,
+      "default_wall_start_seconds": 6.988791,
+      "default_wall_end_seconds": 14.150332,
+      "default_wall_duration_seconds": 7.161541,
       "visual_description": "「フィジカルAI」のタイトル、主催者名、4章の構成が表示される。",
       "narration_text": "テーマは、フィジカルAIです。その仕組みと活用の広がりを、順にご紹介します。",
       "reading_kana_for_estimation": "てーまは、ふぃじかるえーあいです。そのしくみとかつようのひろがりを、じゅんにごしょうかいします。",
@@ -87,9 +87,6 @@
         6.6,
         8.3
       ],
-      "fits_default_scene_estimate": true,
-      "fits_1x_scene_estimate": false,
-      "minimum_scene_slow_with_0_5s_margin_estimate": 1.58,
       "source_subtitle_cues": [
         {
           "timeline_start_seconds": 5.0,
@@ -103,7 +100,7 @@
         }
       ],
       "planned_audio_path": "audio/scene-02.mp3",
-      "audio_status": "generated",
+      "audio_status": "generated_continuous",
       "narration_cues": [
         {
           "timeline_start_seconds": 5,
@@ -114,8 +111,11 @@
           "text": "その仕組みと活用の広がりを、順にご紹介します。"
         }
       ],
-      "measured_padded_audio_seconds": 10.056,
-      "measured_speech_before_padding_seconds": 8.664
+      "measured_speech_before_padding_seconds": 8.544,
+      "measured_audio_seconds": 7.224,
+      "initial_plan_fits_default_scene_estimate": true,
+      "initial_plan_fits_1x_scene_estimate": false,
+      "initial_plan_minimum_scene_slow_with_0_5s_margin_estimate": 1.58
     },
     {
       "id": "scene-03",
@@ -125,9 +125,9 @@
       "timeline_start_seconds": 10,
       "timeline_end_seconds": 20,
       "timeline_duration_seconds": 10,
-      "default_wall_start_seconds": 20,
-      "default_wall_end_seconds": 40,
-      "default_wall_duration_seconds": 20,
+      "default_wall_start_seconds": 14.150332,
+      "default_wall_end_seconds": 27.740582,
+      "default_wall_duration_seconds": 13.59025,
       "visual_description": "文章・夕焼け画像を生成するAIが、現実のカメラ・ロボットにつながる。",
       "narration_text": "生成AIは、言葉で頼むと文章や画像をつくります。そのAIが、現実の世界へ。見て、考えて、ロボットが動く。これがフィジカルAIです。",
       "reading_kana_for_estimation": "せいせいえーあいは、ことばでたのむとぶんしょうやがぞうをつくります。そのえーあいが、げんじつのせかいへ。みて、かんがえて、ろぼっとがうごく。これがふぃじかるえーあいです。",
@@ -137,9 +137,6 @@
         12.4,
         15.5
       ],
-      "fits_default_scene_estimate": true,
-      "fits_1x_scene_estimate": false,
-      "minimum_scene_slow_with_0_5s_margin_estimate": 1.42,
       "source_subtitle_cues": [
         {
           "timeline_start_seconds": 10.0,
@@ -158,7 +155,7 @@
         }
       ],
       "planned_audio_path": "audio/scene-03.mp3",
-      "audio_status": "generated",
+      "audio_status": "generated_continuous",
       "narration_cues": [
         {
           "timeline_start_seconds": 10,
@@ -173,8 +170,11 @@
           "text": "見て、考えて、ロボットが動く。これがフィジカルAIです。"
         }
       ],
-      "measured_padded_audio_seconds": 20.064,
-      "measured_speech_before_padding_seconds": 16.368
+      "measured_speech_before_padding_seconds": 16.176,
+      "measured_audio_seconds": 13.656,
+      "initial_plan_fits_default_scene_estimate": true,
+      "initial_plan_fits_1x_scene_estimate": false,
+      "initial_plan_minimum_scene_slow_with_0_5s_margin_estimate": 1.42
     },
     {
       "id": "scene-04",
@@ -184,9 +184,9 @@
       "timeline_start_seconds": 20,
       "timeline_end_seconds": 32,
       "timeline_duration_seconds": 12,
-      "default_wall_start_seconds": 40,
-      "default_wall_end_seconds": 64,
-      "default_wall_duration_seconds": 24,
+      "default_wall_start_seconds": 27.740582,
+      "default_wall_end_seconds": 40.018582,
+      "default_wall_duration_seconds": 12.278,
       "visual_description": "カメラとマイク、AI、ロボットと電動ピペットの3枚のカードが順に強調される。",
       "narration_text": "カメラやマイクで、状況をとらえます。AIが何をすべきか判断し、ロボットが動きます。色材を取り分けて混ぜる、実際の作業につながります。",
       "reading_kana_for_estimation": "かめらやまいくで、じょうきょうをとらえます。えーあいがなにをすべきかはんだんし、ろぼっとがうごきます。しきざいをとりわけてまぜる、じっさいのさぎょうにつながります。",
@@ -196,9 +196,6 @@
         11.4,
         14.4
       ],
-      "fits_default_scene_estimate": true,
-      "fits_1x_scene_estimate": false,
-      "minimum_scene_slow_with_0_5s_margin_estimate": 1.1,
       "source_subtitle_cues": [
         {
           "timeline_start_seconds": 20.0,
@@ -222,7 +219,7 @@
         }
       ],
       "planned_audio_path": "audio/scene-04.mp3",
-      "audio_status": "generated",
+      "audio_status": "generated_continuous",
       "narration_cues": [
         {
           "timeline_start_seconds": 20,
@@ -241,8 +238,11 @@
           "text": "色材を取り分けて混ぜる、実際の作業につながります。"
         }
       ],
-      "measured_padded_audio_seconds": 24.048,
-      "measured_speech_before_padding_seconds": 15.384
+      "measured_speech_before_padding_seconds": 14.28,
+      "measured_audio_seconds": 12.336,
+      "initial_plan_fits_default_scene_estimate": true,
+      "initial_plan_fits_1x_scene_estimate": false,
+      "initial_plan_minimum_scene_slow_with_0_5s_margin_estimate": 1.1
     },
     {
       "id": "scene-05",
@@ -252,9 +252,9 @@
       "timeline_start_seconds": 32,
       "timeline_end_seconds": 45,
       "timeline_duration_seconds": 13,
-      "default_wall_start_seconds": 64,
-      "default_wall_end_seconds": 90,
-      "default_wall_duration_seconds": 26,
+      "default_wall_start_seconds": 40.018582,
+      "default_wall_end_seconds": 56.361249,
+      "default_wall_duration_seconds": 16.342667,
       "visual_description": "左に教えた軌道の反復と教え直し、右に言葉の指示と作業部品を選ぶAIが表示される。",
       "narration_text": "従来のロボットは、教えた動きを正確に繰り返すのが得意です。作業が変わると、人が教え直します。フィジカルAIは言葉の指示を理解し、作業を組み立てることで、教え直しを減らせます。",
       "reading_kana_for_estimation": "じゅうらいのろぼっとは、おしえたうごきをせいかくにくりかえすのがとくいです。さぎょうがかわると、ひとがおしえなおします。ふぃじかるえーあいはことばのしじをりかいし、さぎょうをくみたてることで、おしえなおしをへらせます。",
@@ -264,9 +264,6 @@
         14.8,
         18.8
       ],
-      "fits_default_scene_estimate": true,
-      "fits_1x_scene_estimate": false,
-      "minimum_scene_slow_with_0_5s_margin_estimate": 1.31,
       "source_subtitle_cues": [
         {
           "timeline_start_seconds": 32.0,
@@ -290,7 +287,7 @@
         }
       ],
       "planned_audio_path": "audio/scene-05.mp3",
-      "audio_status": "generated",
+      "audio_status": "generated_continuous",
       "narration_cues": [
         {
           "timeline_start_seconds": 32,
@@ -305,8 +302,11 @@
           "text": "フィジカルAIは言葉の指示を理解し、作業を組み立てることで、教え直しを減らせます。"
         }
       ],
-      "measured_padded_audio_seconds": 26.064,
-      "measured_speech_before_padding_seconds": 18.552
+      "measured_speech_before_padding_seconds": 18.36,
+      "measured_audio_seconds": 16.392,
+      "initial_plan_fits_default_scene_estimate": true,
+      "initial_plan_fits_1x_scene_estimate": false,
+      "initial_plan_minimum_scene_slow_with_0_5s_margin_estimate": 1.31
     },
     {
       "id": "scene-06",
@@ -316,9 +316,9 @@
       "timeline_start_seconds": 45,
       "timeline_end_seconds": 53,
       "timeline_duration_seconds": 8,
-      "default_wall_start_seconds": 90,
-      "default_wall_end_seconds": 106,
-      "default_wall_duration_seconds": 16,
+      "default_wall_start_seconds": 56.361249,
+      "default_wall_end_seconds": 67.886873,
+      "default_wall_duration_seconds": 11.525624,
       "visual_description": "マイク、カメラ、COBOTTA、電動ピペット、色材、スピーカーにラベルが付く。",
       "narration_text": "こちらが、調合AIロボットです。マイクとカメラが耳と目。ロボットと電動ピペットが手となり、指示に合わせてレジンの色を調合します。",
       "reading_kana_for_estimation": "こちらが、ちょうごうえーあいろぼっとです。まいくとかめらがみみとめ。ろぼっととでんどうぴぺっとがてとなり、しじにあわせてれじんのいろをちょうごうします。",
@@ -328,9 +328,6 @@
         10.6,
         13.5
       ],
-      "fits_default_scene_estimate": true,
-      "fits_1x_scene_estimate": false,
-      "minimum_scene_slow_with_0_5s_margin_estimate": 1.55,
       "source_subtitle_cues": [
         {
           "timeline_start_seconds": 45.0,
@@ -354,7 +351,7 @@
         }
       ],
       "planned_audio_path": "audio/scene-06.mp3",
-      "audio_status": "generated",
+      "audio_status": "generated_continuous",
       "narration_cues": [
         {
           "timeline_start_seconds": 45,
@@ -373,8 +370,11 @@
           "text": "指示に合わせてレジンの色を調合します。"
         }
       ],
-      "measured_padded_audio_seconds": 16.056,
-      "measured_speech_before_padding_seconds": 14.328
+      "measured_speech_before_padding_seconds": 13.44,
+      "measured_audio_seconds": 11.592,
+      "initial_plan_fits_default_scene_estimate": true,
+      "initial_plan_fits_1x_scene_estimate": false,
+      "initial_plan_minimum_scene_slow_with_0_5s_margin_estimate": 1.55
     },
     {
       "id": "scene-07",
@@ -384,9 +384,9 @@
       "timeline_start_seconds": 53,
       "timeline_end_seconds": 61,
       "timeline_duration_seconds": 8,
-      "default_wall_start_seconds": 106,
-      "default_wall_end_seconds": 122,
-      "default_wall_duration_seconds": 16,
+      "default_wall_start_seconds": 67.886873,
+      "default_wall_end_seconds": 77.826205,
+      "default_wall_duration_seconds": 9.939332,
       "visual_description": "声で紫色を指示する場面から、カメラに色見本を置き色を認識する場面へ。",
       "narration_text": "つくりたい色は、声で伝えます。「紫色をつくって」。色見本をカメラの下に置けば、その色を読み取ることもできます。",
       "reading_kana_for_estimation": "つくりたいいろは、こえでつたえます。「むらさきいろをつくって」。いろみほんをかめらのしたにおけば、そのいろをよみとることもできます。",
@@ -396,9 +396,6 @@
         9.4,
         11.8
       ],
-      "fits_default_scene_estimate": true,
-      "fits_1x_scene_estimate": false,
-      "minimum_scene_slow_with_0_5s_margin_estimate": 1.36,
       "source_subtitle_cues": [
         {
           "timeline_start_seconds": 53.0,
@@ -412,7 +409,7 @@
         }
       ],
       "planned_audio_path": "audio/scene-07.mp3",
-      "audio_status": "generated",
+      "audio_status": "generated_continuous",
       "narration_cues": [
         {
           "timeline_start_seconds": 53,
@@ -423,8 +420,11 @@
           "text": "色見本をカメラの下に置けば、その色を読み取ることもできます。"
         }
       ],
-      "measured_padded_audio_seconds": 16.056,
-      "measured_speech_before_padding_seconds": 12.0
+      "measured_speech_before_padding_seconds": 11.88,
+      "measured_audio_seconds": 10.008,
+      "initial_plan_fits_default_scene_estimate": true,
+      "initial_plan_fits_1x_scene_estimate": false,
+      "initial_plan_minimum_scene_slow_with_0_5s_margin_estimate": 1.36
     },
     {
       "id": "scene-08",
@@ -434,9 +434,9 @@
       "timeline_start_seconds": 61,
       "timeline_end_seconds": 69,
       "timeline_duration_seconds": 8,
-      "default_wall_start_seconds": 122,
-      "default_wall_end_seconds": 138,
-      "default_wall_duration_seconds": 16,
+      "default_wall_start_seconds": 77.826205,
+      "default_wall_end_seconds": 87.837872,
+      "default_wall_duration_seconds": 10.011667,
       "visual_description": "目標の紫色がAIに渡り、赤・青を選んだレシピと量のバーが表示される。",
       "narration_text": "AIが目標の色を理解し、使う色材と、それぞれの量を決めます。紫色なら、赤と青を組み合わせます。",
       "reading_kana_for_estimation": "えーあいがもくひょうのいろをりかいし、つかうしきざいと、それぞれのりょうをきめます。むらさきいろなら、あかとあおをくみあわせます。",
@@ -446,9 +446,6 @@
         9.0,
         11.4
       ],
-      "fits_default_scene_estimate": true,
-      "fits_1x_scene_estimate": false,
-      "minimum_scene_slow_with_0_5s_margin_estimate": 1.31,
       "source_subtitle_cues": [
         {
           "timeline_start_seconds": 61.0,
@@ -467,7 +464,7 @@
         }
       ],
       "planned_audio_path": "audio/scene-08.mp3",
-      "audio_status": "generated",
+      "audio_status": "generated_continuous",
       "narration_cues": [
         {
           "timeline_start_seconds": 61,
@@ -482,8 +479,11 @@
           "text": "紫色なら、赤と青を組み合わせます。"
         }
       ],
-      "measured_padded_audio_seconds": 16.056,
-      "measured_speech_before_padding_seconds": 12.216
+      "measured_speech_before_padding_seconds": 11.328,
+      "measured_audio_seconds": 10.08,
+      "initial_plan_fits_default_scene_estimate": true,
+      "initial_plan_fits_1x_scene_estimate": false,
+      "initial_plan_minimum_scene_slow_with_0_5s_margin_estimate": 1.31
     },
     {
       "id": "scene-09",
@@ -493,9 +493,9 @@
       "timeline_start_seconds": 69,
       "timeline_end_seconds": 77,
       "timeline_duration_seconds": 8,
-      "default_wall_start_seconds": 138,
-      "default_wall_end_seconds": 154,
-      "default_wall_duration_seconds": 16,
+      "default_wall_start_seconds": 87.837872,
+      "default_wall_end_seconds": 97.623706,
+      "default_wall_duration_seconds": 9.785834,
       "visual_description": "赤の吸引・吐出、青の吸引・吐出、撹拌の3段階が進み紫色になる。",
       "narration_text": "ロボットが色材を吸い取り、調合容器へ入れます。次の色材も、同じように。最後にかき混ぜて、完成です。",
       "reading_kana_for_estimation": "ろぼっとがしきざいをすいとり、ちょうごうようきへいれます。つぎのしきざいも、おなじように。さいごにかきまぜて、かんせいです。",
@@ -505,9 +505,6 @@
         9.1,
         11.4
       ],
-      "fits_default_scene_estimate": true,
-      "fits_1x_scene_estimate": false,
-      "minimum_scene_slow_with_0_5s_margin_estimate": 1.32,
       "source_subtitle_cues": [
         {
           "timeline_start_seconds": 69.0,
@@ -526,7 +523,7 @@
         }
       ],
       "planned_audio_path": "audio/scene-09.mp3",
-      "audio_status": "generated",
+      "audio_status": "generated_continuous",
       "narration_cues": [
         {
           "timeline_start_seconds": 69,
@@ -541,8 +538,11 @@
           "text": "最後にかき混ぜて、完成です。"
         }
       ],
-      "measured_padded_audio_seconds": 16.056,
-      "measured_speech_before_padding_seconds": 12.0
+      "measured_speech_before_padding_seconds": 11.76,
+      "measured_audio_seconds": 9.84,
+      "initial_plan_fits_default_scene_estimate": true,
+      "initial_plan_fits_1x_scene_estimate": false,
+      "initial_plan_minimum_scene_slow_with_0_5s_margin_estimate": 1.32
     },
     {
       "id": "scene-10",
@@ -552,9 +552,9 @@
       "timeline_start_seconds": 77,
       "timeline_end_seconds": 85,
       "timeline_duration_seconds": 8,
-      "default_wall_start_seconds": 154,
-      "default_wall_end_seconds": 170,
-      "default_wall_duration_seconds": 16,
+      "default_wall_start_seconds": 97.623706,
+      "default_wall_end_seconds": 108.100831,
+      "default_wall_duration_seconds": 10.477125,
       "visual_description": "「もう少し薄くして」に応じた追加分注、UV硬化、スタッフから来場者への手渡し。",
       "narration_text": "「もう少し薄くして」。言葉で、色を微調整できます。できあがったレジンは、UVライトで固め、お土産としてお渡しします。",
       "reading_kana_for_estimation": "「もうすこしうすくして」。ことばで、いろをびちょうせいできます。できあがったれじんは、ゆーぶいらいとでかため、おみやげとしておわたしします。",
@@ -564,9 +564,6 @@
         9.9,
         12.4
       ],
-      "fits_default_scene_estimate": true,
-      "fits_1x_scene_estimate": false,
-      "minimum_scene_slow_with_0_5s_margin_estimate": 1.44,
       "source_subtitle_cues": [
         {
           "timeline_start_seconds": 77.0,
@@ -585,7 +582,7 @@
         }
       ],
       "planned_audio_path": "audio/scene-10.mp3",
-      "audio_status": "generated",
+      "audio_status": "generated_continuous",
       "narration_cues": [
         {
           "timeline_start_seconds": 77,
@@ -600,8 +597,11 @@
           "text": "お土産としてお渡しします。"
         }
       ],
-      "measured_padded_audio_seconds": 16.056,
-      "measured_speech_before_padding_seconds": 13.248
+      "measured_speech_before_padding_seconds": 12.408,
+      "measured_audio_seconds": 10.536,
+      "initial_plan_fits_default_scene_estimate": true,
+      "initial_plan_fits_1x_scene_estimate": false,
+      "initial_plan_minimum_scene_slow_with_0_5s_margin_estimate": 1.44
     },
     {
       "id": "scene-11",
@@ -611,9 +611,9 @@
       "timeline_start_seconds": 85,
       "timeline_end_seconds": 95,
       "timeline_duration_seconds": 10,
-      "default_wall_start_seconds": 170,
-      "default_wall_end_seconds": 190,
-      "default_wall_duration_seconds": 20,
+      "default_wall_start_seconds": 108.100831,
+      "default_wall_end_seconds": 120.079165,
+      "default_wall_duration_seconds": 11.978334,
       "visual_description": "人→LLMを使うAIエージェント→登録済みスキル→ロボットの接続図。",
       "narration_text": "人の指示を受け取るのは、AIエージェントです。大規模言語モデル、LLMを使い、必要なスキルを選んで手順を組み、ロボットを動かします。",
       "reading_kana_for_estimation": "ひとのしじをうけとるのは、えーあいえーじぇんとです。だいきぼげんごもでる、えるえるえむをつかい、ひつようなすきるをえらんでてじゅんをくみ、ろぼっとをうごかします。",
@@ -623,9 +623,6 @@
         11.1,
         14.2
       ],
-      "fits_default_scene_estimate": true,
-      "fits_1x_scene_estimate": false,
-      "minimum_scene_slow_with_0_5s_margin_estimate": 1.29,
       "source_subtitle_cues": [
         {
           "timeline_start_seconds": 85.0,
@@ -644,7 +641,7 @@
         }
       ],
       "planned_audio_path": "audio/scene-11.mp3",
-      "audio_status": "generated",
+      "audio_status": "generated_continuous",
       "narration_cues": [
         {
           "timeline_start_seconds": 85,
@@ -659,8 +656,11 @@
           "text": "必要なスキルを選んで手順を組み、ロボットを動かします。"
         }
       ],
-      "measured_padded_audio_seconds": 20.064,
-      "measured_speech_before_padding_seconds": 14.208
+      "measured_speech_before_padding_seconds": 13.296,
+      "measured_audio_seconds": 12.048,
+      "initial_plan_fits_default_scene_estimate": true,
+      "initial_plan_fits_1x_scene_estimate": false,
+      "initial_plan_minimum_scene_slow_with_0_5s_margin_estimate": 1.29
     },
     {
       "id": "scene-12",
@@ -670,9 +670,9 @@
       "timeline_start_seconds": 95,
       "timeline_end_seconds": 105,
       "timeline_duration_seconds": 10,
-      "default_wall_start_seconds": 190,
-      "default_wall_end_seconds": 210,
-      "default_wall_duration_seconds": 20,
+      "default_wall_start_seconds": 120.079165,
+      "default_wall_end_seconds": 133.607082,
+      "default_wall_duration_seconds": 13.527917,
       "visual_description": "エンジニアと、色認識・ロボット移動・色材分注・混合撹拌の検証済みカード。",
       "narration_text": "スキルとは、あらかじめ作った作業の部品です。エンジニアが実装し、動作を検証しています。色認識、移動、分注、かき混ぜる動作などを組み合わせます。",
       "reading_kana_for_estimation": "すきるとは、あらかじめつくったさぎょうのぶひんです。えんじにあがじっそうし、どうさをけんしょうしています。いろにんしき、いどう、ぶんちゅう、かきまぜるどうさなどをくみあわせます。",
@@ -682,9 +682,6 @@
         12.5,
         15.8
       ],
-      "fits_default_scene_estimate": true,
-      "fits_1x_scene_estimate": false,
-      "minimum_scene_slow_with_0_5s_margin_estimate": 1.44,
       "source_subtitle_cues": [
         {
           "timeline_start_seconds": 95.0,
@@ -703,7 +700,7 @@
         }
       ],
       "planned_audio_path": "audio/scene-12.mp3",
-      "audio_status": "generated",
+      "audio_status": "generated_continuous",
       "narration_cues": [
         {
           "timeline_start_seconds": 95,
@@ -718,8 +715,11 @@
           "text": "色認識、移動、分注、かき混ぜる動作などを組み合わせます。"
         }
       ],
-      "measured_padded_audio_seconds": 20.064,
-      "measured_speech_before_padding_seconds": 15.72
+      "measured_speech_before_padding_seconds": 15.504,
+      "measured_audio_seconds": 13.584,
+      "initial_plan_fits_default_scene_estimate": true,
+      "initial_plan_fits_1x_scene_estimate": false,
+      "initial_plan_minimum_scene_slow_with_0_5s_margin_estimate": 1.44
     },
     {
       "id": "scene-13",
@@ -729,9 +729,9 @@
       "timeline_start_seconds": 105,
       "timeline_end_seconds": 120,
       "timeline_duration_seconds": 15,
-      "default_wall_start_seconds": 210,
-      "default_wall_end_seconds": 240,
-      "default_wall_duration_seconds": 30,
+      "default_wall_start_seconds": 133.607082,
+      "default_wall_end_seconds": 149.006457,
+      "default_wall_duration_seconds": 15.399375,
       "visual_description": "7工程のフローを強調。指示→解釈→色認識→レシピ→移動分注の反復→撹拌→完了。",
       "narration_text": "「この色を読み取って調合して」。AIが指示を読み解き、カメラで色を読み取ります。レシピを決め、色材ごとに移動と分注を繰り返します。最後にかき混ぜて、完了をお知らせします。",
       "reading_kana_for_estimation": "「このいろをよみとってちょうごうして」。えーあいがしじをよみとき、かめらでいろをよみとります。れしぴをきめ、しきざいごとにいどうとぶんちゅうをくりかえします。さいごにかきまぜて、かんりょうをおしらせします。",
@@ -741,9 +741,6 @@
         14.1,
         17.9
       ],
-      "fits_default_scene_estimate": true,
-      "fits_1x_scene_estimate": false,
-      "minimum_scene_slow_with_0_5s_margin_estimate": 1.09,
       "source_subtitle_cues": [
         {
           "timeline_start_seconds": 105.0,
@@ -782,7 +779,7 @@
         }
       ],
       "planned_audio_path": "audio/scene-13.mp3",
-      "audio_status": "generated",
+      "audio_status": "generated_continuous",
       "narration_cues": [
         {
           "timeline_start_seconds": 105,
@@ -813,8 +810,11 @@
           "text": "完了をお知らせします。"
         }
       ],
-      "measured_padded_audio_seconds": 30.048,
-      "measured_speech_before_padding_seconds": 20.64
+      "measured_speech_before_padding_seconds": 17.928,
+      "measured_audio_seconds": 15.456,
+      "initial_plan_fits_default_scene_estimate": true,
+      "initial_plan_fits_1x_scene_estimate": false,
+      "initial_plan_minimum_scene_slow_with_0_5s_margin_estimate": 1.09
     },
     {
       "id": "scene-14",
@@ -824,9 +824,9 @@
       "timeline_start_seconds": 120,
       "timeline_end_seconds": 130,
       "timeline_duration_seconds": 10,
-      "default_wall_start_seconds": 240,
-      "default_wall_end_seconds": 260,
-      "default_wall_duration_seconds": 20,
+      "default_wall_start_seconds": 149.006457,
+      "default_wall_end_seconds": 162.654831,
+      "default_wall_duration_seconds": 13.648374,
       "visual_description": "左にAIが軌道を直接生成する方式、右にAIが検証済みスキルを選ぶ方式の比較。",
       "narration_text": "AIがロボットの動きそのものをつくる研究も進んでいます。一方、このデモでは、AIが判断と手順を担当し、実際の動作は検証済みのスキルが担います。",
       "reading_kana_for_estimation": "えーあいがろぼっとのうごきそのものをつくるけんきゅうもすすんでいます。いっぽう、このでもでは、えーあいがはんだんとてじゅんをたんとうし、じっさいのどうさはけんしょうずみのすきるがにないます。",
@@ -836,9 +836,6 @@
         12.6,
         16.2
       ],
-      "fits_default_scene_estimate": true,
-      "fits_1x_scene_estimate": false,
-      "minimum_scene_slow_with_0_5s_margin_estimate": 1.47,
       "source_subtitle_cues": [
         {
           "timeline_start_seconds": 120.0,
@@ -857,7 +854,7 @@
         }
       ],
       "planned_audio_path": "audio/scene-14.mp3",
-      "audio_status": "generated",
+      "audio_status": "generated_continuous",
       "narration_cues": [
         {
           "timeline_start_seconds": 120,
@@ -872,8 +869,11 @@
           "text": "担当し、実際の動作は検証済みのスキルが担います。"
         }
       ],
-      "measured_padded_audio_seconds": 20.064,
-      "measured_speech_before_padding_seconds": 16.368
+      "measured_speech_before_padding_seconds": 14.976,
+      "measured_audio_seconds": 13.704,
+      "initial_plan_fits_default_scene_estimate": true,
+      "initial_plan_fits_1x_scene_estimate": false,
+      "initial_plan_minimum_scene_slow_with_0_5s_margin_estimate": 1.47
     },
     {
       "id": "scene-15",
@@ -883,9 +883,9 @@
       "timeline_start_seconds": 130,
       "timeline_end_seconds": 140,
       "timeline_duration_seconds": 10,
-      "default_wall_start_seconds": 260,
-      "default_wall_end_seconds": 280,
-      "default_wall_duration_seconds": 20,
+      "default_wall_start_seconds": 162.654831,
+      "default_wall_end_seconds": 175.904206,
+      "default_wall_duration_seconds": 13.249375,
       "visual_description": "言葉で変更、検証済みスキルで安定した動作、既存ロボットへの後付けの3枚。",
       "narration_text": "プログラムを書き換えず、言葉で作業を変えられます。検証済みスキルで、安定した動きを目指します。必要なスキルを組み込めば、既存のロボットにも後付けできます。",
       "reading_kana_for_estimation": "ぷろぐらむをかきかえず、ことばでさぎょうをかえられます。けんしょうずみすきるで、あんていしたうごきをめざします。ひつようなすきるをくみこめば、きそんのろぼっとにもあとづけできます。",
@@ -895,9 +895,6 @@
         12.5,
         15.9
       ],
-      "fits_default_scene_estimate": true,
-      "fits_1x_scene_estimate": false,
-      "minimum_scene_slow_with_0_5s_margin_estimate": 1.45,
       "source_subtitle_cues": [
         {
           "timeline_start_seconds": 130.0,
@@ -916,7 +913,7 @@
         }
       ],
       "planned_audio_path": "audio/scene-15.mp3",
-      "audio_status": "generated",
+      "audio_status": "generated_continuous",
       "narration_cues": [
         {
           "timeline_start_seconds": 130,
@@ -931,8 +928,11 @@
           "text": "必要なスキルを組み込めば、既存のロボットにも後付けできます。"
         }
       ],
-      "measured_padded_audio_seconds": 20.064,
-      "measured_speech_before_padding_seconds": 15.456
+      "measured_speech_before_padding_seconds": 15.24,
+      "measured_audio_seconds": 13.32,
+      "initial_plan_fits_default_scene_estimate": true,
+      "initial_plan_fits_1x_scene_estimate": false,
+      "initial_plan_minimum_scene_slow_with_0_5s_margin_estimate": 1.45
     },
     {
       "id": "scene-16",
@@ -942,9 +942,9 @@
       "timeline_start_seconds": 140,
       "timeline_end_seconds": 148,
       "timeline_duration_seconds": 8,
-      "default_wall_start_seconds": 280,
-      "default_wall_end_seconds": 296,
-      "default_wall_duration_seconds": 16,
+      "default_wall_start_seconds": 175.904206,
+      "default_wall_end_seconds": 186.500165,
+      "default_wall_duration_seconds": 10.595959,
       "visual_description": "研究者が材料を混ぜ、複数の試作品を並べて見比べる。",
       "narration_text": "どの材料を、どれだけ混ぜるか。試作を並べて見比べる。その判断は、熟練者の経験に頼ることも少なくありません。",
       "reading_kana_for_estimation": "どのざいりょうを、どれだけまぜるか。しさくをならべてみくらべる。そのはんだんは、じゅくれんしゃのけいけんにたよることもすくなくありません。",
@@ -954,9 +954,6 @@
         9.6,
         12.2
       ],
-      "fits_default_scene_estimate": true,
-      "fits_1x_scene_estimate": false,
-      "minimum_scene_slow_with_0_5s_margin_estimate": 1.4,
       "source_subtitle_cues": [
         {
           "timeline_start_seconds": 140.0,
@@ -975,7 +972,7 @@
         }
       ],
       "planned_audio_path": "audio/scene-16.mp3",
-      "audio_status": "generated",
+      "audio_status": "generated_continuous",
       "narration_cues": [
         {
           "timeline_start_seconds": 140,
@@ -990,8 +987,11 @@
           "text": "その判断は、熟練者の経験に頼ることも少なくありません。"
         }
       ],
-      "measured_padded_audio_seconds": 16.056,
-      "measured_speech_before_padding_seconds": 12.792
+      "measured_speech_before_padding_seconds": 12.552,
+      "measured_audio_seconds": 10.656,
+      "initial_plan_fits_default_scene_estimate": true,
+      "initial_plan_fits_1x_scene_estimate": false,
+      "initial_plan_minimum_scene_slow_with_0_5s_margin_estimate": 1.4
     },
     {
       "id": "scene-17",
@@ -1001,9 +1001,9 @@
       "timeline_start_seconds": 148,
       "timeline_end_seconds": 156,
       "timeline_duration_seconds": 8,
-      "default_wall_start_seconds": 296,
-      "default_wall_end_seconds": 312,
-      "default_wall_duration_seconds": 16,
+      "default_wall_start_seconds": 186.500165,
+      "default_wall_end_seconds": 197.765081,
+      "default_wall_duration_seconds": 11.264916,
       "visual_description": "「赤みを抑えて」「香りを控えめに」の指示で、試作品の色と香りの線が変わる。",
       "narration_text": "化粧品では、色や香りの試作に。「赤みを抑えて」「香りを控えめに」。少しずつ配合を変えて、試す作業に活用できます。",
       "reading_kana_for_estimation": "けしょうひんでは、いろやかおりのしさくに。「あかみをおさえて」「かおりをひかえめに」。すこしずつはいごうをかえて、ためすさぎょうにかつようできます。",
@@ -1013,9 +1013,6 @@
         9.9,
         12.5
       ],
-      "fits_default_scene_estimate": true,
-      "fits_1x_scene_estimate": false,
-      "minimum_scene_slow_with_0_5s_margin_estimate": 1.44,
       "source_subtitle_cues": [
         {
           "timeline_start_seconds": 148.0,
@@ -1029,7 +1026,7 @@
         }
       ],
       "planned_audio_path": "audio/scene-17.mp3",
-      "audio_status": "generated",
+      "audio_status": "generated_continuous",
       "narration_cues": [
         {
           "timeline_start_seconds": 148,
@@ -1040,8 +1037,11 @@
           "text": "「香りを控えめに」。少しずつ配合を変えて、試す作業に活用できます。"
         }
       ],
-      "measured_padded_audio_seconds": 16.056,
-      "measured_speech_before_padding_seconds": 14.016
+      "measured_speech_before_padding_seconds": 13.272,
+      "measured_audio_seconds": 11.328,
+      "initial_plan_fits_default_scene_estimate": true,
+      "initial_plan_fits_1x_scene_estimate": false,
+      "initial_plan_minimum_scene_slow_with_0_5s_margin_estimate": 1.44
     },
     {
       "id": "scene-18",
@@ -1051,9 +1051,9 @@
       "timeline_start_seconds": 156,
       "timeline_end_seconds": 164,
       "timeline_duration_seconds": 8,
-      "default_wall_start_seconds": 312,
-      "default_wall_end_seconds": 328,
-      "default_wall_duration_seconds": 16,
+      "default_wall_start_seconds": 197.765081,
+      "default_wall_end_seconds": 208.572956,
+      "default_wall_duration_seconds": 10.807875,
       "visual_description": "「甘さを控えめに」で試作し、人が試飲・評価して次の配合につなげる。",
       "narration_text": "食品や飲料の試作にも。「甘さを控えめに」。人が味や香りを評価し、次の配合へつなげることで、試作を重ねます。",
       "reading_kana_for_estimation": "しょくひんやいんりょうのしさくにも。「あまさをひかえめに」。ひとがあじやかおりをひょうかし、つぎのはいごうへつなげることで、しさくをかさねます。",
@@ -1063,9 +1063,6 @@
         9.8,
         12.3
       ],
-      "fits_default_scene_estimate": true,
-      "fits_1x_scene_estimate": false,
-      "minimum_scene_slow_with_0_5s_margin_estimate": 1.43,
       "source_subtitle_cues": [
         {
           "timeline_start_seconds": 156.0,
@@ -1084,7 +1081,7 @@
         }
       ],
       "planned_audio_path": "audio/scene-18.mp3",
-      "audio_status": "generated",
+      "audio_status": "generated_continuous",
       "narration_cues": [
         {
           "timeline_start_seconds": 156,
@@ -1099,8 +1096,11 @@
           "text": "次の配合へつなげることで、試作を重ねます。"
         }
       ],
-      "measured_padded_audio_seconds": 16.056,
-      "measured_speech_before_padding_seconds": 13.656
+      "measured_speech_before_padding_seconds": 12.744,
+      "measured_audio_seconds": 10.872,
+      "initial_plan_fits_default_scene_estimate": true,
+      "initial_plan_fits_1x_scene_estimate": false,
+      "initial_plan_minimum_scene_slow_with_0_5s_margin_estimate": 1.43
     },
     {
       "id": "scene-19",
@@ -1110,9 +1110,9 @@
       "timeline_start_seconds": 164,
       "timeline_end_seconds": 175,
       "timeline_duration_seconds": 11,
-      "default_wall_start_seconds": 328,
-      "default_wall_end_seconds": 350,
-      "default_wall_duration_seconds": 22,
+      "default_wall_start_seconds": 208.572956,
+      "default_wall_end_seconds": 223.937081,
+      "default_wall_duration_seconds": 15.364125,
       "visual_description": "試薬分注、塗料・樹脂の目標色への調色、中央のロボットと各分野の接続図。",
       "narration_text": "創薬や分析のラボでは、試薬の分注に。塗料や樹脂では、目標の色に合わせる調色に。材料に応じた機器、スキル、評価方法を用意し、現場に合わせて設計します。",
       "reading_kana_for_estimation": "そうやくやぶんせきのらぼでは、しやくのぶんちゅうに。とりょうやじゅしでは、もくひょうのいろにあわせるちょうしょくに。ざいりょうにおうじたきき、すきる、ひょうかほうほうをよういし、げんばにあわせてせっけいします。",
@@ -1122,9 +1122,6 @@
         13.9,
         17.6
       ],
-      "fits_default_scene_estimate": true,
-      "fits_1x_scene_estimate": false,
-      "minimum_scene_slow_with_0_5s_margin_estimate": 1.45,
       "source_subtitle_cues": [
         {
           "timeline_start_seconds": 164.0,
@@ -1143,7 +1140,7 @@
         }
       ],
       "planned_audio_path": "audio/scene-19.mp3",
-      "audio_status": "generated",
+      "audio_status": "generated_continuous",
       "narration_cues": [
         {
           "timeline_start_seconds": 164,
@@ -1158,8 +1155,11 @@
           "text": "材料に応じた機器、スキル、評価方法を用意し、現場に合わせて設計します。"
         }
       ],
-      "measured_padded_audio_seconds": 22.056,
-      "measured_speech_before_padding_seconds": 17.568
+      "measured_speech_before_padding_seconds": 17.328,
+      "measured_audio_seconds": 15.432,
+      "initial_plan_fits_default_scene_estimate": true,
+      "initial_plan_fits_1x_scene_estimate": false,
+      "initial_plan_minimum_scene_slow_with_0_5s_margin_estimate": 1.45
     },
     {
       "id": "scene-20",
@@ -1169,9 +1169,9 @@
       "timeline_start_seconds": 175,
       "timeline_end_seconds": 185,
       "timeline_duration_seconds": 10,
-      "default_wall_start_seconds": 350,
-      "default_wall_end_seconds": 370,
-      "default_wall_duration_seconds": 20,
+      "default_wall_start_seconds": 223.937081,
+      "default_wall_end_seconds": 234.330498,
+      "default_wall_duration_seconds": 10.393417,
       "visual_description": "実機・来場者・スタッフ、応用分野のアイコン、ブーススタッフへの相談案内。",
       "narration_text": "あなたの現場には、どんな調合がありますか。試してみたい作業や課題を、ぜひお聞かせください。ブーススタッフがご案内します。",
       "reading_kana_for_estimation": "あなたのげんばには、どんなちょうごうがありますか。ためしてみたいさぎょうやかだいを、ぜひおきかせください。ぶーすすたっふがごあんないします。",
@@ -1181,9 +1181,6 @@
         9.9,
         12.5
       ],
-      "fits_default_scene_estimate": true,
-      "fits_1x_scene_estimate": false,
-      "minimum_scene_slow_with_0_5s_margin_estimate": 1.15,
       "source_subtitle_cues": [
         {
           "timeline_start_seconds": 175.0,
@@ -1202,7 +1199,7 @@
         }
       ],
       "planned_audio_path": "audio/scene-20.mp3",
-      "audio_status": "generated",
+      "audio_status": "generated_continuous",
       "narration_cues": [
         {
           "timeline_start_seconds": 175,
@@ -1217,8 +1214,11 @@
           "text": "ブーススタッフがご案内します。"
         }
       ],
-      "measured_padded_audio_seconds": 20.064,
-      "measured_speech_before_padding_seconds": 12.552
+      "measured_speech_before_padding_seconds": 12.312,
+      "measured_audio_seconds": 10.464,
+      "initial_plan_fits_default_scene_estimate": true,
+      "initial_plan_fits_1x_scene_estimate": false,
+      "initial_plan_minimum_scene_slow_with_0_5s_margin_estimate": 1.15
     }
   ],
   "generation": {
@@ -1230,6 +1230,9 @@
     "maximum_fit_speed": 1.2,
     "response_format": "mp3",
     "api_key_required": false,
-    "runtime_external_requests": false
+    "runtime_external_requests": false,
+    "flow_mode": "continuous",
+    "maximum_pause_seconds": 0.4,
+    "scene_gap_seconds": 0.45
   }
 }

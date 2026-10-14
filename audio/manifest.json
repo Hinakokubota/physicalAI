@@ -2,536 +2,572 @@
   "schema_version": 1,
   "scenes": {
     "scene-01": {
-      "fingerprint": "c68975512718a92b1b32540f500cc419a82b092986311e6e9187ad523fb90d05",
+      "fingerprint": "fbc12c754c7530f6ca9c2f84458fda1351e5794feb975431a9f3c04a78e7846a",
       "path": "audio/scene-01.mp3",
-      "audio_sha256": "9c2687d21c963fed993af034ab333717cbeea2fa5088445952064f0d162b4cb4",
-      "duration_seconds": 10.056,
-      "cue_measurements": [
-        {
-          "timeline_start_seconds": 0,
-          "source_speech_seconds": 4.968,
-          "fit_speed": 1.0684,
-          "slot_seconds": 4.8
-        },
-        {
-          "timeline_start_seconds": 2.4,
-          "source_speech_seconds": 4.32,
-          "fit_speed": 1.0,
-          "slot_seconds": 5.2
-        }
-      ]
+      "audio_sha256": "2cbf3fb2a1fe452a71b25bc29025f41d3bcd0cd6227b4cb8f7e489394b8f4f56",
+      "duration_seconds": 7.056,
+      "playback_seconds": 6.988791,
+      "render_to_audio": [
+        [
+          0,
+          0.0
+        ],
+        [
+          2.4,
+          3.700666
+        ],
+        [
+          5,
+          6.988791
+        ]
+      ],
+      "speech_source_seconds": 8.28,
+      "removed_pause_seconds": 1.091,
+      "cue_measurements": []
     },
     "scene-02": {
-      "fingerprint": "5dea5b1801dfccebe14b0aa36c3be1a3bc16bdc6d6dd4ac26485daa0a4a5fbb4",
+      "fingerprint": "0296b77ad973e34b2ced4b878db5d0dfea03f2b5a6a6fe66e4c00ea550dbe4b7",
       "path": "audio/scene-02.mp3",
-      "audio_sha256": "40e23b451ba7ff412fff772ea78673ccb3248e9df656cc2f6ca83168e3d88417",
-      "duration_seconds": 10.056,
-      "cue_measurements": [
-        {
-          "timeline_start_seconds": 5,
-          "source_speech_seconds": 3.36,
-          "fit_speed": 1.0,
-          "slot_seconds": 4
-        },
-        {
-          "timeline_start_seconds": 7,
-          "source_speech_seconds": 5.304,
-          "fit_speed": 1.0,
-          "slot_seconds": 6
-        }
-      ]
+      "audio_sha256": "9c62494207e855a62c245f4c5c9cc3c7b57c493ff20820f874134e3a7694b436",
+      "duration_seconds": 7.224,
+      "playback_seconds": 7.161541,
+      "render_to_audio": [
+        [
+          5,
+          0.0
+        ],
+        [
+          7,
+          2.724832
+        ],
+        [
+          10,
+          7.161541
+        ]
+      ],
+      "speech_source_seconds": 8.544,
+      "removed_pause_seconds": 1.182,
+      "cue_measurements": []
     },
     "scene-03": {
-      "fingerprint": "da271ef0648e63505e4fe0a986500e14b5db0f08c4f15321577177310fdf005b",
+      "fingerprint": "13353b6e5a0b031a55d7ba32513bafcf8e6ff9b8cac3abe593c1432c2ef8f4f4",
       "path": "audio/scene-03.mp3",
-      "audio_sha256": "4f13f6046548f092e5cc435b3a14311e3d660437da2b1771166c90d116e0a21e",
-      "duration_seconds": 20.064,
-      "cue_measurements": [
-        {
-          "timeline_start_seconds": 10,
-          "source_speech_seconds": 5.856,
-          "fit_speed": 1.0,
-          "slot_seconds": 6.399999999999999
-        },
-        {
-          "timeline_start_seconds": 13.2,
-          "source_speech_seconds": 3.696,
-          "fit_speed": 1.0713,
-          "slot_seconds": 3.6000000000000014
-        },
-        {
-          "timeline_start_seconds": 15,
-          "source_speech_seconds": 6.816,
-          "fit_speed": 1.0,
-          "slot_seconds": 10
-        }
-      ]
+      "audio_sha256": "c8b02429343feb6988057200eaba18e0a0efb869b5d13d7cb3e6863c14759af9",
+      "duration_seconds": 13.656,
+      "playback_seconds": 13.59025,
+      "render_to_audio": [
+        [
+          10,
+          0.0
+        ],
+        [
+          13.2,
+          5.251916
+        ],
+        [
+          15,
+          8.226791
+        ],
+        [
+          20,
+          13.59025
+        ]
+      ],
+      "speech_source_seconds": 16.176,
+      "removed_pause_seconds": 2.386,
+      "cue_measurements": []
     },
     "scene-04": {
-      "fingerprint": "5b6a0d8c5a03ea57b481ef91a72a8ca22a5eba6351e4e8480fcd9692a2668fd1",
+      "fingerprint": "3fd472c979ab7efab223cdfea2b6c2ae0a847ac49dc6cab1dbaadba3a81e064d",
       "path": "audio/scene-04.mp3",
-      "audio_sha256": "d4a9e63fd587f514caeb0bf2e90ddd4730c95051e063fcb66ca96132ada1e5af",
-      "duration_seconds": 24.048,
-      "cue_measurements": [
-        {
-          "timeline_start_seconds": 20,
-          "source_speech_seconds": 4.032,
-          "fit_speed": 1.0,
-          "slot_seconds": 6
-        },
-        {
-          "timeline_start_seconds": 23,
-          "source_speech_seconds": 3.504,
-          "fit_speed": 1.0,
-          "slot_seconds": 6
-        },
-        {
-          "timeline_start_seconds": 26,
-          "source_speech_seconds": 2.568,
-          "fit_speed": 1.0,
-          "slot_seconds": 6
-        },
-        {
-          "timeline_start_seconds": 29,
-          "source_speech_seconds": 5.28,
-          "fit_speed": 1.0,
-          "slot_seconds": 6
-        }
-      ]
+      "audio_sha256": "042da78568d8dc0b562f895341a966ce461b9766fe39fb9b8992d92a10f97750",
+      "duration_seconds": 12.336,
+      "playback_seconds": 12.278,
+      "render_to_audio": [
+        [
+          20,
+          0.0
+        ],
+        [
+          23,
+          3.382583
+        ],
+        [
+          26,
+          6.158916
+        ],
+        [
+          29,
+          7.855625
+        ],
+        [
+          32,
+          12.278
+        ]
+      ],
+      "speech_source_seconds": 14.28,
+      "removed_pause_seconds": 1.802,
+      "cue_measurements": []
     },
     "scene-05": {
-      "fingerprint": "666880d2983a7b1bb2b80d7596d63ca590dbb198f276725d66562c854151283e",
+      "fingerprint": "1a930f03e302f54a0d30ed053c97016d973ad0a65530f3cd8aedafc52fae6a45",
       "path": "audio/scene-05.mp3",
-      "audio_sha256": "a0ec1fc3e52f5169893d88641ac1e7831295b4026e99ea4cb5617f73d2155ea9",
-      "duration_seconds": 26.064,
-      "cue_measurements": [
-        {
-          "timeline_start_seconds": 32,
-          "source_speech_seconds": 6.288,
-          "fit_speed": 1.0,
-          "slot_seconds": 11.200000000000003
-        },
-        {
-          "timeline_start_seconds": 37.6,
-          "source_speech_seconds": 4.224,
-          "fit_speed": 1.0,
-          "slot_seconds": 5.200000000000003
-        },
-        {
-          "timeline_start_seconds": 40.2,
-          "source_speech_seconds": 8.04,
-          "fit_speed": 1.0,
-          "slot_seconds": 9.599999999999994
-        }
-      ]
+      "audio_sha256": "e7689efe6c412231d29722e49f166309d389503f02cd316005982a5f2e7a96e6",
+      "duration_seconds": 16.392,
+      "playback_seconds": 16.342667,
+      "render_to_audio": [
+        [
+          32,
+          0.0
+        ],
+        [
+          37.6,
+          5.677583
+        ],
+        [
+          40.2,
+          9.14275
+        ],
+        [
+          45,
+          16.342667
+        ]
+      ],
+      "speech_source_seconds": 18.36,
+      "removed_pause_seconds": 1.817,
+      "cue_measurements": []
     },
     "scene-06": {
-      "fingerprint": "0942d30fa9b104c7fbb7e1f0e101a3dbf3c08da8933661d3e77ab50d5550d622",
+      "fingerprint": "940d14ed1690a3269ea767a4d665b311cb8f743121687ad1d374619ed9e3901d",
       "path": "audio/scene-06.mp3",
-      "audio_sha256": "7688ad27029b3051cdeeb12d020df2e3c5617371589f8c3470b04eea8eeedf8b",
-      "duration_seconds": 16.056,
-      "cue_measurements": [
-        {
-          "timeline_start_seconds": 45,
-          "source_speech_seconds": 3.84,
-          "fit_speed": 1.0,
-          "slot_seconds": 4.400000000000006
-        },
-        {
-          "timeline_start_seconds": 47.2,
-          "source_speech_seconds": 2.88,
-          "fit_speed": 1.0,
-          "slot_seconds": 4.0
-        },
-        {
-          "timeline_start_seconds": 49.2,
-          "source_speech_seconds": 3.552,
-          "fit_speed": 1.0,
-          "slot_seconds": 4.0
-        },
-        {
-          "timeline_start_seconds": 51.2,
-          "source_speech_seconds": 4.056,
-          "fit_speed": 1.1757,
-          "slot_seconds": 3.5999999999999943
-        }
-      ]
+      "audio_sha256": "a7f060759b24d8f4adc8f5cf829bb1eccddeccdace8f34c3b9148205f5ed3bba",
+      "duration_seconds": 11.592,
+      "playback_seconds": 11.525624,
+      "render_to_audio": [
+        [
+          45,
+          0.0
+        ],
+        [
+          47.2,
+          3.234124
+        ],
+        [
+          49.2,
+          5.400374
+        ],
+        [
+          51.2,
+          8.242457
+        ],
+        [
+          53,
+          11.525624
+        ]
+      ],
+      "speech_source_seconds": 13.44,
+      "removed_pause_seconds": 1.714,
+      "cue_measurements": []
     },
     "scene-07": {
-      "fingerprint": "f785fde9fb1337a0a22e8e6aa75535cfe1cf5482f1d89873ae7cb9b0e87645d0",
+      "fingerprint": "1cea7c1f7e97f28c7b5cf3163f95e715967b09a3511861dccc12145dae22d154",
       "path": "audio/scene-07.mp3",
-      "audio_sha256": "ae8fdcd1f5d8ec09fde891b1b87a31ebca497a793743853fb553e8b6240c57de",
-      "duration_seconds": 16.056,
-      "cue_measurements": [
-        {
-          "timeline_start_seconds": 53,
-          "source_speech_seconds": 6.144,
-          "fit_speed": 1.0,
-          "slot_seconds": 8
-        },
-        {
-          "timeline_start_seconds": 57,
-          "source_speech_seconds": 5.856,
-          "fit_speed": 1.0,
-          "slot_seconds": 8
-        }
-      ]
+      "audio_sha256": "c4b55bbe1a9185d2af974d150bfd67bbeb4ac366bd63ce09ddf252594de2fbcc",
+      "duration_seconds": 10.008,
+      "playback_seconds": 9.939332,
+      "render_to_audio": [
+        [
+          53,
+          0.0
+        ],
+        [
+          57,
+          4.946874
+        ],
+        [
+          61,
+          9.939332
+        ]
+      ],
+      "speech_source_seconds": 11.88,
+      "removed_pause_seconds": 1.741,
+      "cue_measurements": []
     },
     "scene-08": {
-      "fingerprint": "38a5f3fd86e13f86a08a4fc7bce8ab96098a8f4f64e237a258840a1e59061adc",
+      "fingerprint": "896dc639185532b14cdf7a30229cc0450b0c32cf72b7492b8b11bff68d9932d3",
       "path": "audio/scene-08.mp3",
-      "audio_sha256": "4fc51c657ba13f405c79d068a8a2a6e1c2e136f33d44687c10ab6634d7034b96",
-      "duration_seconds": 16.056,
-      "cue_measurements": [
-        {
-          "timeline_start_seconds": 61,
-          "source_speech_seconds": 3.408,
-          "fit_speed": 1.0,
-          "slot_seconds": 6
-        },
-        {
-          "timeline_start_seconds": 64,
-          "source_speech_seconds": 4.344,
-          "fit_speed": 1.0,
-          "slot_seconds": 6
-        },
-        {
-          "timeline_start_seconds": 67,
-          "source_speech_seconds": 4.464,
-          "fit_speed": 1.1595,
-          "slot_seconds": 4
-        }
-      ]
+      "audio_sha256": "c490884cf45d32009c8dfd37c917f109ed975da0b5268f379fb5b84dcac8d727",
+      "duration_seconds": 10.08,
+      "playback_seconds": 10.011667,
+      "render_to_audio": [
+        [
+          61,
+          0.0
+        ],
+        [
+          64,
+          2.8
+        ],
+        [
+          67,
+          6.385083
+        ],
+        [
+          69,
+          10.011667
+        ]
+      ],
+      "speech_source_seconds": 11.328,
+      "removed_pause_seconds": 1.116,
+      "cue_measurements": []
     },
     "scene-09": {
-      "fingerprint": "ed1989ed1baf76c935799b85d5b2cb030090d05725813685c017f24f2a282fa8",
+      "fingerprint": "e9c581393a4e3b2944025356383492307704858028ec3b8e7d353a97f25eb749",
       "path": "audio/scene-09.mp3",
-      "audio_sha256": "99ef2edc4767b5a1091fc6f7134c9b532b10910b85e195197733e266df6d367e",
-      "duration_seconds": 16.056,
-      "cue_measurements": [
-        {
-          "timeline_start_seconds": 69,
-          "source_speech_seconds": 5.064,
-          "fit_speed": 1.0,
-          "slot_seconds": 6.400000000000006
-        },
-        {
-          "timeline_start_seconds": 72.2,
-          "source_speech_seconds": 3.216,
-          "fit_speed": 1.0,
-          "slot_seconds": 5.0
-        },
-        {
-          "timeline_start_seconds": 74.7,
-          "source_speech_seconds": 3.72,
-          "fit_speed": 1.0,
-          "slot_seconds": 4.599999999999994
-        }
-      ]
+      "audio_sha256": "dd921874f3d1540dc00efca2495ac45b3c3010e340b1e2a508d33485e59d2e22",
+      "duration_seconds": 9.84,
+      "playback_seconds": 9.785834,
+      "render_to_audio": [
+        [
+          69,
+          0.0
+        ],
+        [
+          72.2,
+          4.4785
+        ],
+        [
+          74.7,
+          6.917125
+        ],
+        [
+          77,
+          9.785834
+        ]
+      ],
+      "speech_source_seconds": 11.76,
+      "removed_pause_seconds": 1.774,
+      "cue_measurements": []
     },
     "scene-10": {
-      "fingerprint": "53c672b71c4710631a71920c339841a90702e4dec7db33ef33e210f38931911f",
+      "fingerprint": "268d399c08472281099062db2f467afa0a0b3fd9e3573242e4045198f05f7cc0",
       "path": "audio/scene-10.mp3",
-      "audio_sha256": "c139a34899a7da5f48c9df4f2c5db7321945138e3af2706cfdbb075ec90dc34a",
-      "duration_seconds": 16.056,
-      "cue_measurements": [
-        {
-          "timeline_start_seconds": 77,
-          "source_speech_seconds": 6.024,
-          "fit_speed": 1.0,
-          "slot_seconds": 8
-        },
-        {
-          "timeline_start_seconds": 81,
-          "source_speech_seconds": 4.248,
-          "fit_speed": 1.0,
-          "slot_seconds": 4.400000000000006
-        },
-        {
-          "timeline_start_seconds": 83.2,
-          "source_speech_seconds": 2.976,
-          "fit_speed": 1.0,
-          "slot_seconds": 3.5999999999999943
-        }
-      ]
+      "audio_sha256": "30a6cc44ba254befe5aec304fa7bbe19293da06a1de38d1a0ac7356cfc75591a",
+      "duration_seconds": 10.536,
+      "playback_seconds": 10.477125,
+      "render_to_audio": [
+        [
+          77,
+          0.0
+        ],
+        [
+          81,
+          4.8225
+        ],
+        [
+          83.2,
+          8.283042
+        ],
+        [
+          85,
+          10.477125
+        ]
+      ],
+      "speech_source_seconds": 12.408,
+      "removed_pause_seconds": 1.731,
+      "cue_measurements": []
     },
     "scene-11": {
-      "fingerprint": "783e05a70d2495ff26292d9169d42d1cae62332667501a225f663b30ab495509",
+      "fingerprint": "238a7f99cfdc1114238968a9ad571f70658ade1b743ed58a112849ead11050d3",
       "path": "audio/scene-11.mp3",
-      "audio_sha256": "39d559e24ce4f08e28576c1ee31fc9a1a45e66b911b19d31c6ce0d51d1c77686",
-      "duration_seconds": 20.064,
-      "cue_measurements": [
-        {
-          "timeline_start_seconds": 85,
-          "source_speech_seconds": 4.584,
-          "fit_speed": 1.0,
-          "slot_seconds": 6
-        },
-        {
-          "timeline_start_seconds": 88,
-          "source_speech_seconds": 4.056,
-          "fit_speed": 1.0,
-          "slot_seconds": 6
-        },
-        {
-          "timeline_start_seconds": 91,
-          "source_speech_seconds": 5.568,
-          "fit_speed": 1.0,
-          "slot_seconds": 8
-        }
-      ]
+      "audio_sha256": "d67ffc5736af44ba4c24676fd2f819d9986e9b9ce3b9b63bcf06be8e300d211b",
+      "duration_seconds": 12.048,
+      "playback_seconds": 11.978334,
+      "render_to_audio": [
+        [
+          85,
+          0.0
+        ],
+        [
+          88,
+          3.991084
+        ],
+        [
+          91,
+          7.280542
+        ],
+        [
+          95,
+          11.978334
+        ]
+      ],
+      "speech_source_seconds": 13.296,
+      "removed_pause_seconds": 1.118,
+      "cue_measurements": []
     },
     "scene-12": {
-      "fingerprint": "5466dc8abd1578c6dfd144ca5c1ea398c4a24cbc239d188b1630238da12d6691",
+      "fingerprint": "b0d2f857667f3d642ace85d3803715cfd8670e745e8b070f09bfac3350f01598",
       "path": "audio/scene-12.mp3",
-      "audio_sha256": "2dc032fbefcd65075be0f24df0de096f6d86ef23231d92557022b36b64373091",
-      "duration_seconds": 20.064,
-      "cue_measurements": [
-        {
-          "timeline_start_seconds": 95,
-          "source_speech_seconds": 4.68,
-          "fit_speed": 1.0,
-          "slot_seconds": 6.400000000000006
-        },
-        {
-          "timeline_start_seconds": 98.2,
-          "source_speech_seconds": 4.776,
-          "fit_speed": 1.1238,
-          "slot_seconds": 4.400000000000006
-        },
-        {
-          "timeline_start_seconds": 100.4,
-          "source_speech_seconds": 6.264,
-          "fit_speed": 1.0,
-          "slot_seconds": 9.199999999999989
-        }
-      ]
+      "audio_sha256": "c436aca009bb470357d1b0e5f7267ae551fda2548c540a55472548231ce83470",
+      "duration_seconds": 13.584,
+      "playback_seconds": 13.527917,
+      "render_to_audio": [
+        [
+          95,
+          0.0
+        ],
+        [
+          98.2,
+          4.056709
+        ],
+        [
+          100.4,
+          8.133209
+        ],
+        [
+          105,
+          13.527917
+        ]
+      ],
+      "speech_source_seconds": 15.504,
+      "removed_pause_seconds": 1.776,
+      "cue_measurements": []
     },
     "scene-13": {
-      "fingerprint": "9d909a664314752e13417d7879163d1be055821f5b835a93d751d8aa9bf1c6e1",
+      "fingerprint": "8e136f73b29c6b070a4197d72f0615300ddaf4ea50bb1d3a383f4d82289735f4",
       "path": "audio/scene-13.mp3",
-      "audio_sha256": "387324b79cbffefdea659c73e28009b8f360c7542528b58e0259eae7d8f3a3f2",
-      "duration_seconds": 30.048,
-      "cue_measurements": [
-        {
-          "timeline_start_seconds": 105,
-          "source_speech_seconds": 3.312,
-          "fit_speed": 1.0,
-          "slot_seconds": 4.400000000000006
-        },
-        {
-          "timeline_start_seconds": 107.2,
-          "source_speech_seconds": 2.856,
-          "fit_speed": 1.0,
-          "slot_seconds": 3.1999999999999886
-        },
-        {
-          "timeline_start_seconds": 108.8,
-          "source_speech_seconds": 2.88,
-          "fit_speed": 1.0,
-          "slot_seconds": 3.5999999999999943
-        },
-        {
-          "timeline_start_seconds": 110.6,
-          "source_speech_seconds": 2.112,
-          "fit_speed": 1.0,
-          "slot_seconds": 2.8000000000000114
-        },
-        {
-          "timeline_start_seconds": 112,
-          "source_speech_seconds": 4.224,
-          "fit_speed": 1.0,
-          "slot_seconds": 8.400000000000006
-        },
-        {
-          "timeline_start_seconds": 116.2,
-          "source_speech_seconds": 2.496,
-          "fit_speed": 1.0,
-          "slot_seconds": 4.0
-        },
-        {
-          "timeline_start_seconds": 118.2,
-          "source_speech_seconds": 2.76,
-          "fit_speed": 1.0,
-          "slot_seconds": 3.5999999999999943
-        }
-      ]
+      "audio_sha256": "4ee9542f6264453f9d7ac00e5e24549afee6e7668cb00a5c2580c7b1ddbbdb9f",
+      "duration_seconds": 15.456,
+      "playback_seconds": 15.399375,
+      "render_to_audio": [
+        [
+          105,
+          0.0
+        ],
+        [
+          107.2,
+          2.786666
+        ],
+        [
+          108.8,
+          4.91825
+        ],
+        [
+          110.6,
+          7.022125
+        ],
+        [
+          112,
+          8.364209
+        ],
+        [
+          116.2,
+          11.789667
+        ],
+        [
+          118.2,
+          13.487042
+        ],
+        [
+          120,
+          15.399375
+        ]
+      ],
+      "speech_source_seconds": 17.928,
+      "removed_pause_seconds": 2.329,
+      "cue_measurements": []
     },
     "scene-14": {
-      "fingerprint": "c9906a248bbbd15edeeef7bce392a30f83a0d7abf066ffe4766f09ab188169e7",
+      "fingerprint": "eaeddb73b5768b1deed2e67b3e55846e2f1e4b7ed872a973c9b2902b5742ff58",
       "path": "audio/scene-14.mp3",
-      "audio_sha256": "842089634b53d7b152205abde7cfed7f65a3dd0ad496b8ac24aa99c6ca974a1f",
-      "duration_seconds": 20.064,
-      "cue_measurements": [
-        {
-          "timeline_start_seconds": 120,
-          "source_speech_seconds": 5.352,
-          "fit_speed": 1.0,
-          "slot_seconds": 10
-        },
-        {
-          "timeline_start_seconds": 125,
-          "source_speech_seconds": 5.208,
-          "fit_speed": 1.12,
-          "slot_seconds": 4.800000000000011
-        },
-        {
-          "timeline_start_seconds": 127.4,
-          "source_speech_seconds": 5.808,
-          "fit_speed": 1.1501,
-          "slot_seconds": 5.199999999999989
-        }
-      ]
+      "audio_sha256": "41eec01f2f2de4f01eddfa2dc94b691db92fb05526ace564f8cec487762e4af0",
+      "duration_seconds": 13.704,
+      "playback_seconds": 13.648374,
+      "render_to_audio": [
+        [
+          120,
+          0.0
+        ],
+        [
+          125,
+          4.796957
+        ],
+        [
+          127.4,
+          8.810124
+        ],
+        [
+          130,
+          13.648374
+        ]
+      ],
+      "speech_source_seconds": 14.976,
+      "removed_pause_seconds": 1.128,
+      "cue_measurements": []
     },
     "scene-15": {
-      "fingerprint": "28e97aa57955e8856c36f711690bfdc5691bae74aea149d4b61567fa12adcf78",
+      "fingerprint": "d2584e91193e5f3b22f62f60d84a1b48dead877ce1ad70262212d463358f2ee2",
       "path": "audio/scene-15.mp3",
-      "audio_sha256": "990079ec9100455f58b30dcdd85240bb23d5ae82f876d51f14b9e4518f6a5fa5",
-      "duration_seconds": 20.064,
-      "cue_measurements": [
-        {
-          "timeline_start_seconds": 130,
-          "source_speech_seconds": 4.968,
-          "fit_speed": 1.0,
-          "slot_seconds": 8
-        },
-        {
-          "timeline_start_seconds": 134,
-          "source_speech_seconds": 4.752,
-          "fit_speed": 1.1181,
-          "slot_seconds": 4.399999999999977
-        },
-        {
-          "timeline_start_seconds": 136.2,
-          "source_speech_seconds": 5.736,
-          "fit_speed": 1.0,
-          "slot_seconds": 7.600000000000023
-        }
-      ]
+      "audio_sha256": "9ce658d5dbb60d9894b2d9434807ef2fa92aa9eb16f07916ba86d7ff7cd6120e",
+      "duration_seconds": 13.32,
+      "playback_seconds": 13.249375,
+      "render_to_audio": [
+        [
+          130,
+          0.0
+        ],
+        [
+          134,
+          4.355791
+        ],
+        [
+          136.2,
+          8.347416
+        ],
+        [
+          140,
+          13.249375
+        ]
+      ],
+      "speech_source_seconds": 15.24,
+      "removed_pause_seconds": 1.791,
+      "cue_measurements": []
     },
     "scene-16": {
-      "fingerprint": "ad0a4e551d8464985c10d97d636b8108b8624d2b323c798b4a94f61f5f2cb1d8",
+      "fingerprint": "010dc846790b79eece0f75daaecb0045b431052f80b44722350bc938c732af19",
       "path": "audio/scene-16.mp3",
-      "audio_sha256": "7e65f8a5f40f202e2c8e7d25e5a660e480548aa51255ecf61ea44b70f592546a",
-      "duration_seconds": 16.056,
-      "cue_measurements": [
-        {
-          "timeline_start_seconds": 140,
-          "source_speech_seconds": 3.552,
-          "fit_speed": 1.0,
-          "slot_seconds": 6
-        },
-        {
-          "timeline_start_seconds": 143,
-          "source_speech_seconds": 3.024,
-          "fit_speed": 1.0,
-          "slot_seconds": 4.399999999999977
-        },
-        {
-          "timeline_start_seconds": 145.2,
-          "source_speech_seconds": 6.216,
-          "fit_speed": 1.1406,
-          "slot_seconds": 5.600000000000023
-        }
-      ]
+      "audio_sha256": "06c2f3f6ff0209dc717505a9c330fcd46868a09cc68392151a2eb9672a4b08e7",
+      "duration_seconds": 10.656,
+      "playback_seconds": 10.595959,
+      "render_to_audio": [
+        [
+          140,
+          0.0
+        ],
+        [
+          143,
+          2.943791
+        ],
+        [
+          145.2,
+          5.224333
+        ],
+        [
+          148,
+          10.595959
+        ]
+      ],
+      "speech_source_seconds": 12.552,
+      "removed_pause_seconds": 1.756,
+      "cue_measurements": []
     },
     "scene-17": {
-      "fingerprint": "d213b856892b2602d3d3871938184373b57c95119fc101443bf28b789c82c75f",
+      "fingerprint": "eab91c098906e856ea367ede1c6242bb33e6bffccdd466f09be4dd890eb32423",
       "path": "audio/scene-17.mp3",
-      "audio_sha256": "cb85d2e1ee22a42b96805f51074514c45236d8a2c797cbec1e589a160ca7a7f1",
-      "duration_seconds": 16.056,
-      "cue_measurements": [
-        {
-          "timeline_start_seconds": 148,
-          "source_speech_seconds": 6.288,
-          "fit_speed": 1.0,
-          "slot_seconds": 8
-        },
-        {
-          "timeline_start_seconds": 152,
-          "source_speech_seconds": 7.728,
-          "fit_speed": 1.0,
-          "slot_seconds": 8
-        }
-      ]
+      "audio_sha256": "f4dd1d78fae5f31c69d01b9cdaa512e0626549b5375ce41e36646dd11c089201",
+      "duration_seconds": 11.328,
+      "playback_seconds": 11.264916,
+      "render_to_audio": [
+        [
+          148,
+          0.0
+        ],
+        [
+          152,
+          5.024124
+        ],
+        [
+          156,
+          11.264916
+        ]
+      ],
+      "speech_source_seconds": 13.272,
+      "removed_pause_seconds": 1.807,
+      "cue_measurements": []
     },
     "scene-18": {
-      "fingerprint": "d1f28c8e2bdaa04cc7f22c7754cfb2a0ddd4812423e0dd96844e6c7207395ef7",
+      "fingerprint": "18928eb2c4170c7d6049136677c8995ba4d5f90ff15912e487a0cb91080a1ec1",
       "path": "audio/scene-18.mp3",
-      "audio_sha256": "5654a2d9ff321a04ca2311d7b7978def391f820673555c1ba4c5e34dfca67b39",
-      "duration_seconds": 16.056,
-      "cue_measurements": [
-        {
-          "timeline_start_seconds": 156,
-          "source_speech_seconds": 5.568,
-          "fit_speed": 1.0,
-          "slot_seconds": 6.800000000000011
-        },
-        {
-          "timeline_start_seconds": 159.4,
-          "source_speech_seconds": 3.264,
-          "fit_speed": 1.0,
-          "slot_seconds": 4.0
-        },
-        {
-          "timeline_start_seconds": 161.4,
-          "source_speech_seconds": 4.824,
-          "fit_speed": 1.0,
-          "slot_seconds": 5.199999999999989
-        }
-      ]
+      "audio_sha256": "13d9652f4a00a529d09240044ffc215a3be6347d0eb2e75b7d97775b6b92d67b",
+      "duration_seconds": 10.872,
+      "playback_seconds": 10.807875,
+      "render_to_audio": [
+        [
+          156,
+          0.0
+        ],
+        [
+          159.4,
+          4.3505
+        ],
+        [
+          161.4,
+          6.797833
+        ],
+        [
+          164,
+          10.807875
+        ]
+      ],
+      "speech_source_seconds": 12.744,
+      "removed_pause_seconds": 1.736,
+      "cue_measurements": []
     },
     "scene-19": {
-      "fingerprint": "79c4bf4d1540b93d6cb7c2b8a9c14b4ccd02e20376702f3964309e01533e35e9",
+      "fingerprint": "5d5df1b3f2683212bb5330e4a6b43378124556583787ce0c4a200f6b31c12e96",
       "path": "audio/scene-19.mp3",
-      "audio_sha256": "72402dc1c0fe245c249b61aaf0e9948f5c318b0171c054a7b69347e068c8e0fd",
-      "duration_seconds": 22.056,
-      "cue_measurements": [
-        {
-          "timeline_start_seconds": 164,
-          "source_speech_seconds": 4.824,
-          "fit_speed": 1.0,
-          "slot_seconds": 6
-        },
-        {
-          "timeline_start_seconds": 167,
-          "source_speech_seconds": 5.016,
-          "fit_speed": 1.0,
-          "slot_seconds": 6
-        },
-        {
-          "timeline_start_seconds": 170,
-          "source_speech_seconds": 7.728,
-          "fit_speed": 1.0,
-          "slot_seconds": 10
-        }
-      ]
+      "audio_sha256": "5cca71a9f5bbc317a1e2ca2aec8cd528e68b5a680d8bcc5484bf9384f793fd86",
+      "duration_seconds": 15.432,
+      "playback_seconds": 15.364125,
+      "render_to_audio": [
+        [
+          164,
+          0.0
+        ],
+        [
+          167,
+          4.216792
+        ],
+        [
+          170,
+          8.487875
+        ],
+        [
+          175,
+          15.364125
+        ]
+      ],
+      "speech_source_seconds": 17.328,
+      "removed_pause_seconds": 1.764,
+      "cue_measurements": []
     },
     "scene-20": {
-      "fingerprint": "4faaaff9e531e2fe25a5ff475516e8154e9e39da91740a0144b61ae4be26b023",
+      "fingerprint": "6957425a8531b0bd093112c938a5ada7bf34b5c31dee9ee1f471698da4207ae7",
       "path": "audio/scene-20.mp3",
-      "audio_sha256": "e50d047cc6ca5a8deb6eaa188a767d5ddd7802df65b91c758eb9818014855f4c",
-      "duration_seconds": 20.064,
-      "cue_measurements": [
-        {
-          "timeline_start_seconds": 175,
-          "source_speech_seconds": 4.44,
-          "fit_speed": 1.0,
-          "slot_seconds": 7.199999999999989
-        },
-        {
-          "timeline_start_seconds": 178.6,
-          "source_speech_seconds": 4.896,
-          "fit_speed": 1.0,
-          "slot_seconds": 6.800000000000011
-        },
-        {
-          "timeline_start_seconds": 182,
-          "source_speech_seconds": 3.216,
-          "fit_speed": 1.0,
-          "slot_seconds": 6
-        }
-      ]
+      "audio_sha256": "afb34451799527f61b3083bc46c93c1dc1c54f33f8d8f9dd931f2874d65e5670",
+      "duration_seconds": 10.464,
+      "playback_seconds": 10.393417,
+      "render_to_audio": [
+        [
+          175,
+          0.0
+        ],
+        [
+          178.6,
+          3.893833
+        ],
+        [
+          182,
+          8.015958
+        ],
+        [
+          185,
+          10.393417
+        ]
+      ],
+      "speech_source_seconds": 12.312,
+      "removed_pause_seconds": 1.719,
+      "cue_measurements": []
     }
   },
   "audio_slow": 2,
@@ -544,6 +580,9 @@
     "maximum_fit_speed": 1.2,
     "response_format": "mp3",
     "api_key_required": false,
-    "runtime_external_requests": false
+    "runtime_external_requests": false,
+    "flow_mode": "continuous",
+    "maximum_pause_seconds": 0.4,
+    "scene_gap_seconds": 0.45
   }
 }

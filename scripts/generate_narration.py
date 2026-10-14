@@ -10,9 +10,10 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import unicodedata
 
 ROOT = Path(__file__).resolve().parents[1]
-FORMAT_VERSION = 1
+FORMAT_VERSION = 2
 
 
 def digest(path):
@@ -67,13 +68,27 @@ def fingerprint(scene, settings, slow):
     return hashlib.sha256(json.dumps(content, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
 
 
-def export_timeline(root, data):
+def export_timeline(root, data, manifest=None):
     # Only local paths and timing data enter the browser; no generation service configuration.
     runtime = {'duration': data['timeline']['duration_seconds'],
                'audioSlow': data['timeline']['default_slow'],
                'scenes': [{'id': s['id'], 'start': s['timeline_start_seconds'],
                            'end': s['timeline_end_seconds'], 'path': s['planned_audio_path'],
                            'file': s['chapter_file']} for s in data['scenes']]}
+    wall = 0
+    for scene, result in zip(data['scenes'], runtime['scenes']):
+        entry = (manifest or {}).get('scenes', {}).get(scene['id'], {})
+        anchors = entry.get('render_to_audio')
+        if anchors:
+            result['anchors'] = anchors
+            result['wallStart'] = wall
+            result['wallDuration'] = anchors[-1][1]
+        else:
+            result['anchors'] = [[result['start'], 0], [result['end'], (result['end']-result['start'])*runtime['audioSlow']]]
+            result['wallStart'] = wall
+            result['wallDuration'] = result['anchors'][-1][1]
+        wall += result['wallDuration']
+    runtime['wallDuration'] = round(wall, 6)
     target = root / 'assets/narration-data.js'
     target.parent.mkdir(exist_ok=True)
     target.write_text('window.PhysicalAINarrationData = '+json.dumps(runtime, ensure_ascii=False, indent=2)+';\n', encoding='utf-8')
@@ -94,7 +109,96 @@ def speech_text(text):
     return text.replace('LLM', 'エルエルエム').replace('UV', 'ユーブイ').replace('AI', 'エーアイ')
 
 
+def normalized(text):
+    return ''.join(c for c in text if not c.isspace() and not unicodedata.category(c).startswith(('P', 'Z')))
+
+
+def silence_cuts(path, maximum_pause=0.4):
+    """Only cut the middle of measured quiet pauses; never cut voiced words."""
+    import re
+    result = subprocess.run(['ffmpeg', '-nostdin', '-v', 'info', '-i', str(path),
+        '-af', 'silencedetect=noise=-48dB:d=0.7', '-f', 'null', '-'],
+        check=True, capture_output=True, text=True)
+    starts = [float(v) for v in re.findall(r'silence_start: ([\d.]+)', result.stderr)]
+    ends = [float(v) for v in re.findall(r'silence_end: ([\d.]+)', result.stderr)]
+    return [(a+maximum_pause/2, b-maximum_pause/2) for a,b in zip(starts,ends) if a>0.15 and b-a>0.7]
+
+
+def retime(seconds, cuts):
+    return seconds - sum(max(0, min(seconds, b)-a) for a,b in cuts)
+
+
+async def generate_continuous_scene(root, scene, settings, slow, proxy, key, force=False):
+    import truststore
+    truststore.inject_into_ssl()
+    import edge_tts
+    cache = root/'audio/.cache'/key
+    cache.mkdir(parents=True, exist_ok=True)
+    raw, meta = cache/'continuous.mp3', cache/'words.jsonl'
+    if force or not raw.exists() or not meta.exists():
+        temp, temporary_meta = raw.with_suffix('.part.mp3'), meta.with_suffix('.part.jsonl')
+        try:
+            await edge_tts.Communicate(speech_text(scene['narration_text']), settings['voice'],
+                rate=settings['rate'], pitch=settings['pitch'], volume=settings['volume'],
+                boundary='WordBoundary', proxy=proxy, connect_timeout=15, receive_timeout=60
+            ).save(str(temp), str(temporary_meta))
+            duration(temp)
+            os.replace(temp, raw); os.replace(temporary_meta, meta)
+        finally:
+            temp.unlink(missing_ok=True); temporary_meta.unlink(missing_ok=True)
+    words = [json.loads(line) for line in meta.read_text(encoding='utf-8').splitlines()]
+    words = [w for w in words if w['type']=='WordBoundary']
+    expected_text = normalized(speech_text(scene['narration_text']))
+    if not words or normalized(''.join(w['text'] for w in words)) != expected_text:
+        raise ValueError(f"{scene['id']}: word timing does not match the narration")
+    cuts = silence_cuts(raw, settings.get('maximum_pause_seconds', 0.4))
+    actual = duration(raw)
+    speech_end = (words[-1]['offset']+words[-1]['duration'])/1e7
+    # Keep a short breathing space between scenes, without padding to the old visual slots.
+    rendered_duration = retime(min(actual, speech_end+settings.get('scene_gap_seconds',0.45)), cuts)
+    anchors = [[scene['timeline_start_seconds'],0.0]]
+    position = 0
+    word_positions = []
+    for word in words:
+        word_positions.append((position, retime(word['offset']/1e7,cuts)))
+        position += len(normalized(word['text']))
+    position = len(normalized(speech_text(scene['narration_cues'][0]['text'])))
+    for cue in scene['narration_cues'][1:]:
+        matched = next((offset for char,offset in word_positions if char>=position), None)
+        if matched is None or matched <= anchors[-1][1] or matched >= rendered_duration:
+            raise ValueError(f"{scene['id']}: invalid cue timing")
+        anchors.append([cue['timeline_start_seconds'],round(matched,6)])
+        position += len(normalized(speech_text(cue['text'])))
+    anchors.append([scene['timeline_end_seconds'],round(rendered_duration,6)])
+    spans, cursor = [], 0.0
+    for a,b in cuts:
+        if a >= actual: break
+        spans.append((cursor,a));cursor=b
+    if cursor < actual: spans.append((cursor,actual))
+    filters=[f'[0:a]atrim=start={a:.8f}:end={b:.8f},asetpts=PTS-STARTPTS[c{i}]' for i,(a,b) in enumerate(spans)]
+    filters.append(''.join(f'[c{i}]' for i in range(len(spans)))+
+        f'concat=n={len(spans)}:v=0:a=1,apad,atrim=duration={rendered_duration:.8f}[out]')
+    target = root/scene['planned_audio_path']; temp = target.with_suffix('.part.mp3')
+    try:
+        subprocess.run(['ffmpeg','-nostdin','-v','error','-y','-i',str(raw),
+            '-filter_complex',';'.join(filters),'-map','[out]','-ar','24000','-ac','1',
+            '-c:a','libmp3lame','-b:a','96k',str(temp)],check=True,capture_output=True)
+        measured=duration(temp)
+        if abs(measured-rendered_duration)>.2:
+            raise ValueError('Encoded duration differs from narration timing')
+        os.replace(temp,target)
+    finally:
+        temp.unlink(missing_ok=True)
+    return {'fingerprint':key,'path':scene['planned_audio_path'],'audio_sha256':digest(target),
+            'duration_seconds':round(measured,3),'playback_seconds':round(rendered_duration,6),
+            'render_to_audio':anchors,'speech_source_seconds':actual,
+            'removed_pause_seconds':round(sum(b-a for a,b in cuts),3),
+            'cue_measurements':[]}
+
+
 async def generate_scene(root, scene, settings, slow, proxy, key, force=False):
+    if settings.get('flow_mode') == 'continuous':
+        return await generate_continuous_scene(root, scene, settings, slow, proxy, key, force)
     # Trust the OS certificate store (including an injected corporate/cloud proxy CA).
     # truststore preserves certificate and hostname verification; it never disables TLS checks.
     import truststore
@@ -166,13 +270,13 @@ async def run(args):
         settings['rate'] = args.rate
     if settings['engine'] != 'edge-tts':
         raise ValueError('Only edge-tts is supported')
-    export_timeline(root, data)
+    manifest_path = root / 'audio/manifest.json'
+    manifest = json.loads(manifest_path.read_text(encoding='utf-8')) if manifest_path.exists() else {'schema_version': 1, 'scenes': {}}
+    export_timeline(root, data, manifest)
     if args.sync_data:
         print('Exported local browser timeline; no speech service was contacted.')
         return 0
     slow = data['timeline']['default_slow']
-    manifest_path = root / 'audio/manifest.json'
-    manifest = json.loads(manifest_path.read_text(encoding='utf-8')) if manifest_path.exists() else {'schema_version': 1, 'scenes': {}}
     valid_ids = {s['id'] for s in data['scenes']}
     if args.scene and not set(args.scene) <= valid_ids:
         raise ValueError('Unknown scene ID')
@@ -208,6 +312,7 @@ async def run(args):
         manifest['settings'] = settings
         # Persist each completed scene so an interrupted run can resume without repeated requests.
         write_json(manifest_path, manifest)
+        export_timeline(root, data, manifest)
         print(f"{scene['id']}: saved ({entry['duration_seconds']:.2f}s)", flush=True)
     return 0
 

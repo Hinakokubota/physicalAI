@@ -26,6 +26,7 @@ class GenerationTests(unittest.TestCase):
         self.root = Path(self.temp.name)
         (self.root/'narration').mkdir()
         self.data = json.loads((ROOT/'narration/narration.ja.json').read_text(encoding='utf-8'))
+        self.data['generation'].pop('flow_mode', None)
         self.save()
         self.calls = []
         calls = self.calls
@@ -33,11 +34,16 @@ class GenerationTests(unittest.TestCase):
         class SpeechFixture:
             def __init__(self, text, voice, **kwargs):
                 calls.append((text, voice))
+                self.text = text
 
-            async def save(self, path):
+            async def save(self, path, metadata_path=None):
                 subprocess.run(['ffmpeg', '-nostdin', '-v', 'error', '-y', '-f', 'lavfi',
                                 '-i', 'sine=frequency=440:duration=0.6', '-ar', '24000',
                                 '-c:a', 'libmp3lame', path], check=True, capture_output=True)
+                if metadata_path:
+                    words = [{'type':'WordBoundary','offset':i*50000,'duration':40000,'text':c}
+                             for i,c in enumerate(generator.normalized(self.text))]
+                    Path(metadata_path).write_text('\n'.join(json.dumps(w) for w in words),encoding='utf-8')
 
         self.modules = patch.dict(sys.modules, {
             'edge_tts': types.SimpleNamespace(Communicate=SpeechFixture),
@@ -116,6 +122,22 @@ class GenerationTests(unittest.TestCase):
         self.assertEqual(target.read_bytes(), original)
         self.assertEqual((self.root/'audio/manifest.json').read_bytes(), manifest)
         self.assertFalse(list((self.root/'audio/.cache').rglob('*.part.mp3')))
+
+    def test_continuous_speech_and_word_aligned_timeline(self):
+        self.data['generation']['flow_mode'] = 'continuous'
+        self.save()
+        self.assertEqual(self.run_generator(),0)
+        self.assertEqual(len(self.calls),1,'One contextual request per scene, not per fragment')
+        manifest=json.loads((self.root/'audio/manifest.json').read_text())
+        entry=manifest['scenes']['scene-01']
+        self.assertLess(entry['playback_seconds'],2,'Do not pad speech to the old ten-second scene slot')
+        anchors=entry['render_to_audio']
+        self.assertEqual(anchors[0],[0,0])
+        self.assertEqual(anchors[-1][0],5)
+        self.assertEqual(anchors[1][0],2.4)
+        self.assertTrue(all(a[1]<b[1] for a,b in zip(anchors,anchors[1:])))
+        self.assertEqual(self.run_generator(),0)
+        self.assertEqual(len(self.calls),1,'Unchanged continuous speech must be reused')
 
 
 if __name__ == '__main__':
